@@ -1,35 +1,54 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import './App.css'; // You can remove the default styles later
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [transcribedText, setTranscribedText] = useState('');
+  const [isListening, setIsListening] = useState(false);
+
+  const startListening = () => {
+    // Check if the browser supports Speech Recognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Your browser doesn't support Speech Recognition. Try Chrome.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'hi-IN'; 
+    recognition.interimResults = false; // We only want the final result
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      console.log('Listening started...');
+    };
+
+    recognition.onresult = (event) => {
+      const speechToText = event.results[0][0].transcript;
+      console.log('Recognized text:', speechToText);
+      setTranscribedText(speechToText);
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+      console.log('Listening stopped.');
+    };
+
+    recognition.start();
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="App">
+      <h1>ASHA Voice Assistant</h1>
+      <button onClick={startListening} disabled={isListening}>
+        {isListening ? 'Listening...' : 'Start Recording'}
+      </button>
+      {transcribedText && <p>You said: {transcribedText}</p>}
+    </div>
+  );
 }
 
-export default App
+export default App;
