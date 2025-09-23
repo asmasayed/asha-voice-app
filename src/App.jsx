@@ -4,6 +4,7 @@ import './App.css'; // You can remove the default styles later
 function App() {
   const [transcribedText, setTranscribedText] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [parsedData, setParsedData] = useState(null);
 
   const startListening = () => {
     // Check if the browser supports Speech Recognition
@@ -31,12 +32,14 @@ function App() {
       // Update the state to show the live transcript on the screen
       setTranscribedText(transcript);
 
+      const data = parseHindiText(transcript); 
+
       // Check if the final result has been recognized
       if (event.results[0].isFinal) {
         console.log('Final recognized text:', transcript);
         // parse data to hindi
-        const parsedData = parseHindiText(transcript);
-        console.log('Parsed Data:', parsedData);
+        console.log('Parsed Data:', data);
+        setParsedData(data);
       }
     };
 
@@ -52,13 +55,45 @@ function App() {
     recognition.start();
   };
 
+  const handleConfirm = () => {
+    console.log('Visit confirmed:', parsedData);
+    // Later, we will add this to a list of visits.
+    setParsedData(null); // Reset to go back to the main screen
+  };
+
+  const handleRetry = () => {
+    console.log('Retrying...');
+    setParsedData(null); // Reset to go back to the main screen
+  };
+
   return (
     <div className="App">
       <h1>ASHA Voice Assistant</h1>
-      <button onClick={startListening} disabled={isListening}>
-        {isListening ? 'Listening...' : 'Start Recording'}
-      </button>
-      {transcribedText && <p>You said: {transcribedText}</p>}
+
+      {/* --- Conditional UI Rendering --- */}
+      {parsedData ? (
+        // --- Confirmation View ---
+        <div className="confirmation-card">
+          <h2>Please Confirm Visit Details</h2>
+          <div className="details">
+            <p><strong>Name:</strong> {parsedData.name}</p>
+            <p><strong>Age:</strong> {parsedData.age}</p>
+            <p><strong>Symptoms:</strong> {parsedData.symptoms.join(', ')}</p>
+          </div>
+          <div className="buttons">
+            <button onClick={handleConfirm} className="confirm-btn">Confirm & Save</button>
+            <button onClick={handleRetry} className="retry-btn">Retry</button>
+          </div>
+        </div>
+      ) : (
+        // --- Main Recording View ---
+        <div className="recording-view">
+          <button onClick={startListening} disabled={isListening}>
+            {isListening ? 'Listening...' : 'Start Recording'}
+          </button>
+          <p className="live-transcript">{transcribedText}</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -124,7 +159,7 @@ for (const keyword of ageKeywords) {
   // --- Logic to find SYMPTOMS ---
   // You can list all possible symptoms you want to detect
   const possibleSymptoms = {
-    "बुखार": "fever", "खांसी": "cough", "दर्द": "pain", "कमजोरी": "weakness"
+    "बुखार": "fever", "खांसी": "cough", "दर्द": "pain", "कमजोरी": "weakness","सर्दी":"cold"
   };
   words.forEach(word => {
     if (possibleSymptoms[word]) {
