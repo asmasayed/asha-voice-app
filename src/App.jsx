@@ -1,107 +1,10 @@
-import { useState } from 'react';
-import './App.css'; // You can remove the default styles later
-
-function App() {
-  const [transcribedText, setTranscribedText] = useState('');
-  const [isListening, setIsListening] = useState(false);
-  const [parsedData, setParsedData] = useState(null);
-
-  const startListening = () => {
-    // Check if the browser supports Speech Recognition
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert("Your browser doesn't support Speech Recognition. Try Chrome.");
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'hi-IN'; 
-    recognition.interimResults = true; // We only want the final result
-
-    recognition.onstart = () => {
-      setIsListening(true);
-      console.log('Listening started...');
-    };
-
-    recognition.onresult = (event) => {
-      const transcript = Array.from(event.results)
-        .map(result => result[0])
-        .map(result => result.transcript)
-        .join('');
-
-      // Update the state to show the live transcript on the screen
-      setTranscribedText(transcript);
-
-      const data = parseHindiText(transcript); 
-
-      // Check if the final result has been recognized
-      if (event.results[0].isFinal) {
-        console.log('Final recognized text:', transcript);
-        // parse data to hindi
-        console.log('Parsed Data:', data);
-        setParsedData(data);
-      }
-    };
-
-    recognition.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-      console.log('Listening stopped.');
-    };
-
-    recognition.start();
-  };
-
-  const handleConfirm = () => {
-    console.log('Visit confirmed:', parsedData);
-    // Later, we will add this to a list of visits.
-    setParsedData(null); // Reset to go back to the main screen
-  };
-
-  const handleRetry = () => {
-    console.log('Retrying...');
-    setParsedData(null); // Reset to go back to the main screen
-  };
-
-  return (
-    <div className="App">
-      <h1>ASHA Voice Assistant</h1>
-
-      {/* --- Conditional UI Rendering --- */}
-      {parsedData ? (
-        // --- Confirmation View ---
-        <div className="confirmation-card">
-          <h2>Please Confirm Visit Details</h2>
-          <div className="details">
-            <p><strong>Name:</strong> {parsedData.name}</p>
-            <p><strong>Age:</strong> {parsedData.age}</p>
-            <p><strong>Symptoms:</strong> {parsedData.symptoms.join(', ')}</p>
-          </div>
-          <div className="buttons">
-            <button onClick={handleConfirm} className="confirm-btn">Confirm & Save</button>
-            <button onClick={handleRetry} className="retry-btn">Retry</button>
-          </div>
-        </div>
-      ) : (
-        // --- Main Recording View ---
-        <div className="recording-view">
-          <button onClick={startListening} disabled={isListening}>
-            {isListening ? 'Listening...' : 'Start Recording'}
-          </button>
-          <p className="live-transcript">{transcribedText}</p>
-        </div>
-      )}
-    </div>
-  );
-}
+import { useState, useRef } from 'react';
+import './App.css'
 
 function parseHindiText(text) {
-  console.log("Parsing text:", text); // For debugging
-
-  const stopWords = new Set(['और', 'था', 'है', 'की', 'का', 'तो', 'थी']);
+  // A set of common words to ignore when searching for names or other data.
+  // Using a Set provides a very fast way to check for a word's existence.
+  const stopWords = new Set(['और', 'था', 'है', 'की', 'का', 'तो', 'थी', 'उसका', 'उसकी', 'मेरा', 'हैं']);
   
   const data = {
     name: null,
@@ -109,68 +12,209 @@ function parseHindiText(text) {
     symptoms: [],
   };
 
-  // logic:
+  // Clean the text by removing punctuation and splitting it into an array of words.
   const words = text.replace(/[.,]/g, '').split(' ');
- 
 
   // --- Logic to find the NAME ---
-  const nameKeywords = ['उपनाम ', 'नाम'];
+  // We look for keywords that typically precede or follow a name.
+  const nameKeywords = ['उपनाम', 'नाम'];
   for (const keyword of nameKeywords) {
     const keywordIndex = words.indexOf(keyword);
-
     if (keywordIndex > -1) {
-      // First, check the word AFTER the keyword
       const potentialNameAfter = words[keywordIndex + 1];
+      
+      // 1. Check the word immediately AFTER the keyword.
       if (potentialNameAfter && !stopWords.has(potentialNameAfter)) {
         data.name = potentialNameAfter;
         break; // Found the name, so we can stop searching.
+      } 
+      // 2. If the word after was a stop word (like 'है'), check the NEXT word.
+      else if (potentialNameAfter && stopWords.has(potentialNameAfter)) {
+        const nameFurtherAhead = words[keywordIndex + 2];
+        if (nameFurtherAhead && !stopWords.has(nameFurtherAhead)) {
+          data.name = nameFurtherAhead;
+          break;
+        }
       }
 
-      // If not found, THEN check the word BEFORE the keyword
+      // 3. As a fallback, check the word BEFORE the keyword.
       const potentialNameBefore = words[keywordIndex - 1];
       if (potentialNameBefore && !stopWords.has(potentialNameBefore)) {
         data.name = potentialNameBefore;
-        break; // Found the name, so we can stop searching.
+        break;
       }
     }
   }
 
   // --- Logic to find the AGE ---
-  const ageKeywords = ['आयु', 'उम्र', 'साल']; // Add variations you want to catch
-let ageFound = false; // A flag to stop searching once we find it
-
-for (const keyword of ageKeywords) {
-  const keywordIndex = words.indexOf(keyword);
-
-  // Check if the keyword exists AND there is a word immediately BEFORE it
-  if (keywordIndex > 0) {
-    // Get the word before "saal"
-    const potentialAge = parseInt(words[keywordIndex - 1]);
-
-    // Check if that word is a valid number
-    if (!isNaN(potentialAge)) { // isNaN checks if it's "Not a Number"
-      data.age = potentialAge;
-      ageFound = true;
-      break; // Exit the loop as soon as we find a valid age
+  const ageKeywords = ['आयु', 'उम्र', 'साल'];
+  let ageFound = false;
+  for (const keyword of ageKeywords) {
+    const keywordIndex = words.indexOf(keyword);
+    if (keywordIndex > -1) {
+      // 1. Check for a number AFTER the keyword (e.g., "उम्र 25").
+      const potentialAgeAfter = parseInt(words[keywordIndex + 1]);
+      if (!isNaN(potentialAgeAfter)) {
+        data.age = potentialAgeAfter;
+        ageFound = true;
+        break;
+      }
+      // 2. Check for a number BEFORE the keyword (e.g., "25 साल").
+      const potentialAgeBefore = parseInt(words[keywordIndex - 1]);
+      if (!isNaN(potentialAgeBefore)) {
+        data.age = potentialAgeBefore;
+        ageFound = true;
+        break;
+      }
     }
   }
-}
 
   // --- Logic to find SYMPTOMS ---
-  // You can list all possible symptoms you want to detect
   const possibleSymptoms = {
-    "बुखार": "fever", "खांसी": "cough", "दर्द": "pain", "कमजोरी": "weakness","सर्दी":"cold"
+    "बुखार": "fever", "खांसी": "cough", "दर्द": "pain", "कमजोरी": "weakness"
   };
   words.forEach(word => {
-    if (possibleSymptoms[word]) {
-      // Avoid adding duplicates
-      if (!data.symptoms.includes(possibleSymptoms[word])) {
-        data.symptoms.push(possibleSymptoms[word]);
-      }
+    // If a word matches a known symptom and isn't already in the list, add it.
+    if (possibleSymptoms[word] && !data.symptoms.includes(possibleSymptoms[word])) {
+      data.symptoms.push(possibleSymptoms[word]);
     }
   });
 
   return data;
 }
 
+function App() {
+  // State for the live text transcript from the microphone.
+  const [transcribedText, setTranscribedText] = useState('');
+  // State to manage the recording status: 'idle', 'recording', 'paused'.
+  const [recordingStatus, setRecordingStatus] = useState('idle');
+  // State to hold the final parsed data, which triggers the confirmation view.
+  const [parsedData, setParsedData] = useState(null);
+
+  // useRef is used to hold a persistent reference to the SpeechRecognition object
+  // across re-renders, without causing them.
+  const recognitionRef = useRef(null);
+  
+  // This ref helps preserve the transcript during pause/resume cycles.
+  const accumulatedTranscriptRef = useRef('');
+
+  // Handles starting a new recording or resuming a paused one.
+  const handleStartOrResume = () => {
+    // Before starting, save the current transcript to the ref.
+    accumulatedTranscriptRef.current = transcribedText;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Your browser doesn't support Speech Recognition. Please use Chrome.");
+      return;
+    }
+
+    recognitionRef.current = new SpeechRecognition();
+    const recognition = recognitionRef.current;
+    
+    recognition.lang = 'hi-IN'; // Set language to Hindi.
+    recognition.interimResults = true; // Get live results as the user speaks.
+    recognition.continuous = true; // Keep listening even during pauses.
+
+    recognition.onresult = (event) => {
+      let interimTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        interimTranscript += event.results[i][0].transcript;
+      }
+      // THE KEY FIX: Combine the old transcript (from before the pause) with the new part.
+      setTranscribedText(accumulatedTranscriptRef.current + interimTranscript);
+    };
+
+    recognition.onerror = (event) => console.error('Speech recognition error:', event.error);
+    
+    recognition.start();
+    setRecordingStatus('recording');
+  };
+  
+  // Pauses the recording.
+  const handlePause = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop(); // Temporarily stop listening.
+      setRecordingStatus('paused');
+    }
+  };
+
+  // Stops the recording completely and processes the final text.
+  const handleStop = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      const finalTranscript = transcribedText;
+      const data = parseHindiText(finalTranscript);
+      setParsedData(data); // Show the confirmation card.
+      setRecordingStatus('idle');
+      accumulatedTranscriptRef.current = ''; // Clear the ref for the next session.
+    }
+  };
+  
+  // Handles the confirmation of the parsed data.
+  const handleConfirm = () => {
+    console.log('Visit confirmed:', parsedData);
+    // In a real app, you would save this data to a list or send it to a server.
+    setParsedData(null); // Go back to the main screen.
+    setTranscribedText(''); // Clear the transcript.
+  };
+
+  // Handles retrying the recording.
+  const handleRetry = () => {
+    setParsedData(null); // Go back to the main screen.
+    setTranscribedText(''); // Clear the transcript.
+  };
+
+  return (
+    <>
+      
+      <div className="container">
+        <header>
+          <h1>आशा সহায়ক</h1>
+          <p>ASHA Voice Assistant</p>
+        </header>
+        
+        <main>
+          {/* Conditional UI: Show confirmation card or recording view */}
+          {parsedData ? (
+            <div className="card confirmation-card">
+              <h2>Please Confirm Visit Details</h2>
+              <div className="details">
+                <p><strong>Name:</strong> {parsedData.name || 'Not found'}</p>
+                <p><strong>Age:</strong> {parsedData.age || 'Not found'}</p>
+                <p><strong>Symptoms:</strong> {parsedData.symptoms.join(', ') || 'None'}</p>
+              </div>
+              <div className="button-group">
+                <button onClick={handleConfirm} className="btn btn-confirm">Confirm & Save</button>
+                <button onClick={handleRetry} className="btn btn-retry">Record Again</button>
+              </div>
+            </div>
+          ) : (
+            <div className="card recording-view">
+              <div className="transcript-box">
+                <p>{transcribedText || "Press 'Start Recording' and speak..."}</p>
+              </div>
+              <div className="button-group">
+                {recordingStatus === 'idle' && (
+                  <button onClick={handleStartOrResume} className="btn btn-start">Start Recording</button>
+                )}
+                {recordingStatus === 'recording' && (
+                  <button onClick={handlePause} className="btn btn-pause">Pause</button>
+                )}
+                {recordingStatus === 'paused' && (
+                  <button onClick={handleStartOrResume} className="btn btn-resume">Resume</button>
+                )}
+                {(recordingStatus === 'recording' || recordingStatus === 'paused') && (
+                  <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
+                )}
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+    </>
+  );
+}
+
 export default App;
+
