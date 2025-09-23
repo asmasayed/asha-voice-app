@@ -15,7 +15,7 @@ function App() {
 
     const recognition = new SpeechRecognition();
     recognition.lang = 'hi-IN'; 
-    recognition.interimResults = false; // We only want the final result
+    recognition.interimResults = true; // We only want the final result
 
     recognition.onstart = () => {
       setIsListening(true);
@@ -23,9 +23,19 @@ function App() {
     };
 
     recognition.onresult = (event) => {
-      const speechToText = event.results[0][0].transcript;
-      console.log('Recognized text:', speechToText);
-      setTranscribedText(speechToText);
+      const transcript = Array.from(event.results)
+        .map(result => result[0])
+        .map(result => result.transcript)
+        .join('');
+
+      // Update the state to show the live transcript on the screen
+      setTranscribedText(transcript);
+
+      // Check if the final result has been recognized
+      if (event.results[0].isFinal) {
+        console.log('Final recognized text:', transcript);
+        // This is where you will eventually call your parseHindiText(transcript) function!
+      }
     };
 
     recognition.onerror = (event) => {
