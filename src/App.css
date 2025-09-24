@@ -59,7 +59,7 @@ header p {
 }
 
 .card.recording-view{
-  width: 300px;
+  width: 350px;
 }
 
 .transcript-box {
@@ -221,4 +221,64 @@ header p {
     transform: scale(1);
     box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4);
   }
+}
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding: 0.5rem 0;
+}
+.detail-item:last-child {
+  border-bottom: none;
+}
+.detail-item p {
+  margin: 0;
+  flex-grow: 1;
+}
+
+.btn-edit {
+  background: none;
+  border: 1px solid #ccc;
+  color: #555;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  margin-left: 1rem;
+}
+.btn-edit:hover {
+  background-color: #f0f0f0;
+}
+
+.edit-form {
+  width: 100%;
+  display: flex;
+  gap: 0.5rem;
+}
+.edit-form input {
+  flex-grow: 1;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.edit-form button {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+.edit-form button[type="submit"] {
+  background-color: var(--success-color);
+  color: white;
+}
+.edit-form button[type="button"] {
+  background-color: #6c757d;
+  color: white;
+}
+
+.button-group-confirm {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
 }

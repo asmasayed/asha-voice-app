@@ -84,12 +84,10 @@ function parseHindiText(text) {
 }
 
 function App() {
-  // State for the live text transcript from the microphone.
   const [transcribedText, setTranscribedText] = useState('');
-  // State to manage the recording status: 'idle', 'recording', 'paused'.
   const [recordingStatus, setRecordingStatus] = useState('idle');
-  // State to hold the final parsed data, which triggers the confirmation view.
   const [parsedData, setParsedData] = useState(null);
+  const [editingField, setEditingField] = useState(null);
 
   // useRef is used to hold a persistent reference to the SpeechRecognition object
   // across re-renders, without causing them.
@@ -148,14 +146,10 @@ function App() {
     }
   };
 
-  // --- THIS IS THE UPDATED FUNCTION ---
   // Stops the recording completely and processes the final text.
   const handleStop = () => {
-    // The final transcript is whatever text is currently in our state.
     const finalTranscript = transcribedText;
 
-    // IMPORTANT: Only try to stop the recognition object if it's actively running.
-    // If we are paused, it's already stopped, so we don't need to do anything.
     if (recordingStatus === 'recording' && recognitionRef.current) {
       recognitionRef.current.stop();
     }
@@ -185,6 +179,31 @@ function App() {
     setTranscribedText('');
   };
 
+  // 1. When the user clicks an "Edit" button
+  const handleEdit = (fieldName) => {
+    setEditingField(fieldName); // Set the field to be edited (e.g., 'name')
+  };
+
+  // 2. When the user saves the change from an input field
+  const handleSaveEdit = (event) => {
+    event.preventDefault(); // Prevent the form from reloading the page
+    const input = event.target.elements.editInput;
+    const updatedValue = input.value;
+
+    // Update the main parsedData state with the new value
+    setParsedData(prevData => ({
+      ...prevData,
+      [editingField]: updatedValue, // Update the specific field that was being edited
+    }));
+
+    setEditingField(null); // Exit editing mode
+  };
+
+  // 3. When the user cancels an edit
+  const handleCancelEdit = () => {
+    setEditingField(null); // Exit editing mode without saving
+  };
+
   return (
     <>
       <div className="container">
@@ -196,17 +215,56 @@ function App() {
         <main>
           {parsedData ? (
             <div className="card confirmation-card">
-              <h2>Please Confirm Visit Details</h2>
-              <div className="details">
-                <p><strong>Name:</strong> {parsedData.name || 'Not found'}</p>
-                <p><strong>Age:</strong> {parsedData.age || 'Not found'}</p>
-                <p><strong>Symptoms:</strong> {parsedData.symptoms.join(', ') || 'None'}</p>
-              </div>
-              <div className="button-group">
-                <button onClick={handleConfirm} className="btn btn-confirm">Confirm & Save</button>
-                <button onClick={handleRetry} className="btn btn-retry">Record Again</button>
-              </div>
-            </div>
+  <h2>Please Confirm Visit Details</h2>
+  <div className="details">
+    {/* --- NAME FIELD --- */}
+    <div className="detail-item">
+      {editingField === 'name' ? (
+        <form onSubmit={handleSaveEdit} className="edit-form">
+          <input type="text" name="editInput" defaultValue={parsedData.name || ''} autoFocus />
+          <button type="submit">Save</button>
+          <button onClick={handleCancelEdit} style={{ padding: "0px",fontSize:"20px" }}>
+            ❌
+          </button>
+
+        </form>
+      ) : (
+        <>
+          <p><strong>Name:</strong> {parsedData.name || 'Not found'}</p>
+          <button onClick={() => handleEdit('name')} className="btn-edit">Edit</button>
+        </>
+      )}
+    </div>
+
+    {/* --- AGE FIELD --- */}
+    <div className="detail-item">
+      {editingField === 'age' ? (
+        <form onSubmit={handleSaveEdit} className="edit-form">
+          <input type="number" name="editInput" defaultValue={parsedData.age || ''} autoFocus />
+          <button type="submit">Save</button>
+          <button  style={{ padding: "0px",fontSize:"20px" }} onClick={handleCancelEdit}>❌</button>
+        </form>
+      ) : (
+        <>
+          <p><strong>Age:</strong> {parsedData.age || 'Not found'}</p>
+          <button onClick={() => handleEdit('age')} className="btn-edit">Edit</button>
+        </>
+      )}
+    </div>
+    
+    {/* --- SYMPTOMS FIELD --- */}
+    <div className="detail-item">
+        {/* Note: Editing symptoms is complex, we'll keep it simple for now */}
+        <p><strong>Symptoms:</strong> {Array.isArray(parsedData.symptoms) ? parsedData.symptoms.join(', ') : parsedData.symptoms || 'None'}</p>
+    </div>
+  </div>
+
+    <div className="button-group-confirm">
+      <button onClick={handleRetry} className="btn btn-retry">Record Again</button>
+      <button onClick={handleConfirm} className="btn btn-confirm">Confirm & Save</button>
+      
+    </div>
+  </div>
           ) : (
             <div className="card recording-view">
               <div className="button-group">
