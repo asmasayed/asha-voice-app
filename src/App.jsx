@@ -1,10 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './App.css'
 
 function parseHindiText(text) {
   // A set of common words to ignore when searching for names or other data.
   // Using a Set provides a very fast way to check for a word's existence.
-  const stopWords = new Set(['और', 'था', 'है', 'की', 'का', 'तो', 'थी', 'उसका', 'उसकी', 'मेरा', 'हैं']);
+  const stopWords = new Set(['और', 'था', 'है', 'की', 'ка', 'तो', 'थी', 'उसका', 'उसकी', 'मेरा', 'हैं']);
   
   const data = {
     name: null,
@@ -98,9 +98,16 @@ function App() {
   // This ref helps preserve the transcript during pause/resume cycles.
   const accumulatedTranscriptRef = useRef('');
 
+  const transcriptBoxRef = useRef(null);
+
+  useEffect(() => {
+    if (transcriptBoxRef.current) {
+      transcriptBoxRef.current.scrollTop = transcriptBoxRef.current.scrollHeight;
+    }
+  }, [transcribedText]);
+
   // Handles starting a new recording or resuming a paused one.
   const handleStartOrResume = () => {
-    // Before starting, save the current transcript to the ref.
     accumulatedTranscriptRef.current = transcribedText;
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -112,16 +119,15 @@ function App() {
     recognitionRef.current = new SpeechRecognition();
     const recognition = recognitionRef.current;
     
-    recognition.lang = 'hi-IN'; // Set language to Hindi.
-    recognition.interimResults = true; // Get live results as the user speaks.
-    recognition.continuous = true; // Keep listening even during pauses.
+    recognition.lang = 'hi-IN';
+    recognition.interimResults = true;
+    recognition.continuous = true;
 
     recognition.onresult = (event) => {
       let interimTranscript = '';
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         interimTranscript += event.results[i][0].transcript;
       }
-      // THE KEY FIX: Combine the old transcript (from before the pause) with the new part.
       setTranscribedText(accumulatedTranscriptRef.current + interimTranscript);
     };
 
@@ -134,48 +140,60 @@ function App() {
   // Pauses the recording.
   const handlePause = () => {
     if (recognitionRef.current) {
-      recognitionRef.current.stop(); // Temporarily stop listening.
+      recognitionRef.current.stop();
       setRecordingStatus('paused');
+
+      console.log("--- PAUSED ---");
+      console.log("Transcript so far:", transcribedText);
     }
   };
 
+  // --- THIS IS THE UPDATED FUNCTION ---
   // Stops the recording completely and processes the final text.
   const handleStop = () => {
-    if (recognitionRef.current) {
+    // The final transcript is whatever text is currently in our state.
+    const finalTranscript = transcribedText;
+
+    // IMPORTANT: Only try to stop the recognition object if it's actively running.
+    // If we are paused, it's already stopped, so we don't need to do anything.
+    if (recordingStatus === 'recording' && recognitionRef.current) {
       recognitionRef.current.stop();
-      const finalTranscript = transcribedText;
-      const data = parseHindiText(finalTranscript);
-      setParsedData(data); // Show the confirmation card.
-      setRecordingStatus('idle');
-      accumulatedTranscriptRef.current = ''; // Clear the ref for the next session.
     }
+
+    // Now, regardless of the previous state, parse the text we captured.
+    const data = parseHindiText(finalTranscript);
+    
+    console.log("--- STOPPED & PARSED ---");
+    console.log("Extracted Data:", data);
+    
+    setParsedData(data); // Show the confirmation card.
+    setRecordingStatus('idle');
+    accumulatedTranscriptRef.current = ''; // Clear the ref for the next session.
   };
   
   // Handles the confirmation of the parsed data.
   const handleConfirm = () => {
-    console.log('Visit confirmed:', parsedData);
-    // In a real app, you would save this data to a list or send it to a server.
-    setParsedData(null); // Go back to the main screen.
-    setTranscribedText(''); // Clear the transcript.
+    console.log("--- CONFIRMED ---");
+    console.log("Final data to be saved:", parsedData);
+    setParsedData(null);
+    setTranscribedText('');
   };
 
   // Handles retrying the recording.
   const handleRetry = () => {
-    setParsedData(null); // Go back to the main screen.
-    setTranscribedText(''); // Clear the transcript.
+    setParsedData(null);
+    setTranscribedText('');
   };
 
   return (
     <>
-      
       <div className="container">
         <header>
-          <h1>आशा সহায়ক</h1>
+          <h1>आशा सहायक</h1>
           <p>ASHA Voice Assistant</p>
         </header>
         
         <main>
-          {/* Conditional UI: Show confirmation card or recording view */}
           {parsedData ? (
             <div className="card confirmation-card">
               <h2>Please Confirm Visit Details</h2>
@@ -191,23 +209,45 @@ function App() {
             </div>
           ) : (
             <div className="card recording-view">
-              <div className="transcript-box">
-                <p>{transcribedText || "Press 'Start Recording' and speak..."}</p>
-              </div>
               <div className="button-group">
-                {recordingStatus === 'idle' && (
-                  <button onClick={handleStartOrResume} className="btn btn-start">Start Recording</button>
-                )}
-                {recordingStatus === 'recording' && (
+              {/* When Idle: Show a large, clickable mic button */}
+              {recordingStatus === 'idle' && (
+                <div className="mic-wrapper">
+                  <div onClick={handleStartOrResume} className="mic-button">
+                    <img src="/mic.png" alt="Microphone icon" />
+                  </div>
+                  <p className="mic-text">Press to Record</p>
+                </div>
+              )}
+
+              {/* When Recording: Show the pulsing mic and the Pause/Stop buttons */}
+              {recordingStatus === 'recording' && (
+                <>
+                  <div className="mic-button is-recording">
+                    <img src="/mic.png" alt="Recording icon" />
+                  </div>
                   <button onClick={handlePause} className="btn btn-pause">Pause</button>
-                )}
-                {recordingStatus === 'paused' && (
-                  <button onClick={handleStartOrResume} className="btn btn-resume">Resume</button>
-                )}
-                {(recordingStatus === 'recording' || recordingStatus === 'paused') && (
                   <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
-                )}
+                </>
+              )}
+
+              {/* When Paused: Show the static mic and the Resume/Stop buttons */}
+              {recordingStatus === 'paused' && (
+                <>
+                  <div className="mic-button is-paused">
+                    <img src="/mic.png" alt="Paused icon" />
+                  </div>
+                  <button onClick={handleStartOrResume} className="btn btn-resume">Resume</button>
+                  <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
+                </>
+              )}
+            </div>
+              
+            {recordingStatus !== 'idle' && (
+              <div ref={transcriptBoxRef} className="transcript-box">
+                <p>{transcribedText}</p>
               </div>
+            )}
             </div>
           )}
         </main>
