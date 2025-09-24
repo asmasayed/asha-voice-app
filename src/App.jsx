@@ -1,87 +1,30 @@
 import { useState, useRef, useEffect } from 'react';
 import './App.css'
+import parseHindiText from './parseHindiText'
 
-function parseHindiText(text) {
-  // A set of common words to ignore when searching for names or other data.
-  // Using a Set provides a very fast way to check for a word's existence.
-  const stopWords = new Set(['और', 'था', 'है', 'की', 'ка', 'तो', 'थी', 'उसका', 'उसकी', 'मेरा', 'हैं']);
-  
-  const data = {
-    name: null,
-    age: null,
-    symptoms: [],
-  };
+// In App.jsx, add this entire component above `function App() { ... }`
 
-  // Clean the text by removing punctuation and splitting it into an array of words.
-  const words = text.replace(/[.,]/g, '').split(' ');
+// A reusable component for displaying and editing a single field.
+const DetailRow = ({ label, value, fieldPath, editingField, onEdit, onSave, onCancel, inputType = 'text' }) => {
+  const isEditing = editingField === fieldPath;
 
-  // --- Logic to find the NAME ---
-  // We look for keywords that typically precede or follow a name.
-  const nameKeywords = ['उपनाम', 'नाम'];
-  for (const keyword of nameKeywords) {
-    const keywordIndex = words.indexOf(keyword);
-    if (keywordIndex > -1) {
-      const potentialNameAfter = words[keywordIndex + 1];
-      
-      // 1. Check the word immediately AFTER the keyword.
-      if (potentialNameAfter && !stopWords.has(potentialNameAfter)) {
-        data.name = potentialNameAfter;
-        break; // Found the name, so we can stop searching.
-      } 
-      // 2. If the word after was a stop word (like 'है'), check the NEXT word.
-      else if (potentialNameAfter && stopWords.has(potentialNameAfter)) {
-        const nameFurtherAhead = words[keywordIndex + 2];
-        if (nameFurtherAhead && !stopWords.has(nameFurtherAhead)) {
-          data.name = nameFurtherAhead;
-          break;
-        }
-      }
-
-      // 3. As a fallback, check the word BEFORE the keyword.
-      const potentialNameBefore = words[keywordIndex - 1];
-      if (potentialNameBefore && !stopWords.has(potentialNameBefore)) {
-        data.name = potentialNameBefore;
-        break;
-      }
-    }
-  }
-
-  // --- Logic to find the AGE ---
-  const ageKeywords = ['आयु', 'उम्र', 'साल'];
-  let ageFound = false;
-  for (const keyword of ageKeywords) {
-    const keywordIndex = words.indexOf(keyword);
-    if (keywordIndex > -1) {
-      // 1. Check for a number AFTER the keyword (e.g., "उम्र 25").
-      const potentialAgeAfter = parseInt(words[keywordIndex + 1]);
-      if (!isNaN(potentialAgeAfter)) {
-        data.age = potentialAgeAfter;
-        ageFound = true;
-        break;
-      }
-      // 2. Check for a number BEFORE the keyword (e.g., "25 साल").
-      const potentialAgeBefore = parseInt(words[keywordIndex - 1]);
-      if (!isNaN(potentialAgeBefore)) {
-        data.age = potentialAgeBefore;
-        ageFound = true;
-        break;
-      }
-    }
-  }
-
-  // --- Logic to find SYMPTOMS ---
-  const possibleSymptoms = {
-    "बुखार": "fever", "खांसी": "cough", "दर्द": "pain", "कमजोरी": "weakness"
-  };
-  words.forEach(word => {
-    // If a word matches a known symptom and isn't already in the list, add it.
-    if (possibleSymptoms[word] && !data.symptoms.includes(possibleSymptoms[word])) {
-      data.symptoms.push(possibleSymptoms[word]);
-    }
-  });
-
-  return data;
-}
+  return (
+    <div className="detail-item">
+      {isEditing ? (
+        <form onSubmit={onSave} className="edit-form">
+          <input type={inputType} name="editInput" defaultValue={value || ''} autoFocus />
+          <button type="submit" className="btn-save-edit">Save</button>
+          <button style={{ padding: "0px",fontSize:"18px" }} onClick={onCancel} className="btn-cancel-edit">❌</button>
+        </form>
+      ) : (
+        <>
+          <p><strong>{label}:</strong> {value || <span className="not-found">Not found</span>}</p>
+          <button onClick={() => onEdit(fieldPath)} className="btn-edit">Edit</button>
+        </>
+      )}
+    </div>
+  );
+};
 
 function App() {
   const [transcribedText, setTranscribedText] = useState('');
@@ -186,15 +129,24 @@ function App() {
 
   // 2. When the user saves the change from an input field
   const handleSaveEdit = (event) => {
-    event.preventDefault(); // Prevent the form from reloading the page
-    const input = event.target.elements.editInput;
-    const updatedValue = input.value;
+    event.preventDefault();
+    const updatedValue = event.target.elements.editInput.value;
+    const fieldPath = editingField; // e.g., "basicInfo.patientName"
 
-    // Update the main parsedData state with the new value
-    setParsedData(prevData => ({
-      ...prevData,
-      [editingField]: updatedValue, // Update the specific field that was being edited
-    }));
+    setParsedData(prevData => {
+      const newData = JSON.parse(JSON.stringify(prevData)); // Deep copy to avoid mutation
+      const keys = fieldPath.split('.'); // ['basicInfo', 'patientName']
+      
+      let temp = newData;
+      // Navigate down the object path
+      for (let i = 0; i < keys.length - 1; i++) {
+        temp = temp[keys[i]];
+      }
+      // Set the value on the final key
+      temp[keys[keys.length - 1]] = updatedValue;
+      
+      return newData;
+    });
 
     setEditingField(null); // Exit editing mode
   };
@@ -215,56 +167,49 @@ function App() {
         <main>
           {parsedData ? (
             <div className="card confirmation-card">
-  <h2>Please Confirm Visit Details</h2>
-  <div className="details">
-    {/* --- NAME FIELD --- */}
-    <div className="detail-item">
-      {editingField === 'name' ? (
-        <form onSubmit={handleSaveEdit} className="edit-form">
-          <input type="text" name="editInput" defaultValue={parsedData.name || ''} autoFocus />
-          <button type="submit">Save</button>
-          <button onClick={handleCancelEdit} style={{ padding: "0px",fontSize:"20px" }}>
-            ❌
-          </button>
+              <h2>Confirm Visit Details</h2>
+              
+              {/* --- SECTION 1: BASIC INFO (Always shows) --- */}
+              <div className="confirmation-section">
+                <h3>Basic Information</h3>
+                <DetailRow label="Patient Name" value={parsedData.basicInfo.patientName} fieldPath="basicInfo.patientName" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                <DetailRow label="Age" value={parsedData.basicInfo.age} fieldPath="basicInfo.age" inputType="number" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                <DetailRow label="Gender" value={parsedData.basicInfo.gender} fieldPath="basicInfo.gender" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                <DetailRow label="Visit Date" value={parsedData.basicInfo.visitDate} fieldPath="basicInfo.visitDate" inputType="date" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+              </div>
 
-        </form>
-      ) : (
-        <>
-          <p><strong>Name:</strong> {parsedData.name || 'Not found'}</p>
-          <button onClick={() => handleEdit('name')} className="btn-edit">Edit</button>
-        </>
-      )}
-    </div>
+              {/* --- SECTION 2: MATERNAL HEALTH (Conditional) --- */}
+              {parsedData.visitType === 'Maternal' && (
+                <div className="confirmation-section">
+                  <h3>Maternal Health</h3>
+                  <DetailRow label="Pregnant?" value={parsedData.maternalHealth.isPregnant} fieldPath="maternalHealth.isPregnant" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                  <DetailRow label="ANC Visits" value={parsedData.maternalHealth.ancVisits} fieldPath="maternalHealth.ancVisits" inputType="number" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                </div>
+              )}
 
-    {/* --- AGE FIELD --- */}
-    <div className="detail-item">
-      {editingField === 'age' ? (
-        <form onSubmit={handleSaveEdit} className="edit-form">
-          <input type="number" name="editInput" defaultValue={parsedData.age || ''} autoFocus />
-          <button type="submit">Save</button>
-          <button  style={{ padding: "0px",fontSize:"20px" }} onClick={handleCancelEdit}>❌</button>
-        </form>
-      ) : (
-        <>
-          <p><strong>Age:</strong> {parsedData.age || 'Not found'}</p>
-          <button onClick={() => handleEdit('age')} className="btn-edit">Edit</button>
-        </>
-      )}
-    </div>
-    
-    {/* --- SYMPTOMS FIELD --- */}
-    <div className="detail-item">
-        {/* Note: Editing symptoms is complex, we'll keep it simple for now */}
-        <p><strong>Symptoms:</strong> {Array.isArray(parsedData.symptoms) ? parsedData.symptoms.join(', ') : parsedData.symptoms || 'None'}</p>
-    </div>
-  </div>
+              {/* --- SECTION 2: CHILD HEALTH (Conditional) --- */}
+              {parsedData.visitType === 'Child' && (
+                <div className="confirmation-section">
+                  <h3>Child Health</h3>
+                  <DetailRow label="Child's Name" value={parsedData.childHealth.childName} fieldPath="childHealth.childName" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                  <DetailRow label="Weight" value={parsedData.childHealth.weight} fieldPath="childHealth.weight" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                </div>
+              )}
 
-    <div className="button-group-confirm">
-      <button onClick={handleRetry} className="btn btn-retry">Record Again</button>
-      <button onClick={handleConfirm} className="btn btn-confirm">Confirm & Save</button>
-      
-    </div>
-  </div>
+              {/* --- SECTION 3: GENERAL HEALTH & TREATMENT (Always shows) --- */}
+              <div className="confirmation-section">
+                  <h3>General Health & Treatment</h3>
+                  <p><strong>Symptoms:</strong> {parsedData.generalHealth.currentSymptoms.join(', ') || 'None'}</p>
+                  <p><strong>Medicine Provided:</strong> {parsedData.treatment.medicineProvided.join(', ') || 'None'}</p>
+                  <p><strong>Referred:</strong> {parsedData.treatment.isReferred || 'No'}</p>
+              </div>
+
+              {/* --- FINAL ACTION BUTTONS --- */}
+              <div className="button-group-confirm">
+                <button onClick={handleRetry} className="btn btn-retry">Record Again</button>
+                <button onClick={handleConfirm} className="btn btn-confirm">Confirm & Save</button>
+              </div>
+            </div>
           ) : (
             <div className="card recording-view">
               <div className="button-group">
