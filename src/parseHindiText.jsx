@@ -12,6 +12,8 @@ function parseHindiText(text) {
   // Clean and split the text into words
   const words = text.replace(/[.,!?]/g, '').toLowerCase().split(/\s+/);
   
+  const stopWords = new Set(['है', 'हैं', 'था', 'थी', 'थे', 'का', 'की', 'को', 'से', 'में', 'और', 'ये', 'वह', 'इस', 'उसका', 'उसकी']);
+
   // --- COMPREHENSIVE KEYWORDS MAPPING ---
   const keywords = {
     // ===== BASIC INFO =====
@@ -105,9 +107,7 @@ function parseHindiText(text) {
     // Child Illness Symptoms
     'बच्चेकीबीमारी': { field: 'childHealth.illnessSymptoms', type: 'flag', value: 'सामान्य बीमारी' },
     'डायरिया': { field: 'childHealth.illnessSymptoms', type: 'flag', value: 'डायरिया' },
-    'दस्त': { field: 'childHealth.illnessSymptoms', type: 'flag', value: 'दस्त' },
-    'उल्टी': { field: 'childHealth.illnessSymptoms', type: 'flag', value: 'उल्टी' },
-    'सांसकीतकलीफ': { field: 'childHealth.illnessSymptoms', type: 'flag', value: 'सांस की तकलीफ' },
+    'सांस की तकलीफ': { field: 'childHealth.illnessSymptoms', type: 'flag', value: 'सांस की तकलीफ' },
     'निमोनिया': { field: 'childHealth.illnessSymptoms', type: 'flag', value: 'निमोनिया' },
 
     // ===== IMMUNIZATION =====
@@ -157,7 +157,6 @@ function parseHindiText(text) {
     'पेट दर्द': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'पेट दर्द' },
     'छातीदर्द': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'छाती दर्द' },
     'जोड़ोंदर्द': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'जोड़ों का दर्द' },
-    'सांसकीतकलीफ': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'सांस की तकलीफ' },
     'चक्कर': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'चक्कर आना' },
     'जीमिचलाना': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'जी मिचलाना' },
     'उल्टी': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'उल्टी' },
@@ -209,8 +208,8 @@ function parseHindiText(text) {
     'गर्भनिरोध': { field: 'familyPlanning.contraceptionMethod', type: 'string' },
     'कॉन्ट्रासेप्शन': { field: 'familyPlanning.contraceptionMethod', type: 'string' },
     'कंडोम': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'कंडोम' },
-    'गोली': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'गर्भनिरोधक गोली' },
-    'इंजेक्शन': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'इंजेक्शन' },
+    'गर्भनिरोधकगोली': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'गर्भनिरोधक गोली' },
+    'गर्भनिरोधकइंजेक्शन': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'इंजेक्शन' },
     'आईयूडी': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'IUD' },
     'कॉपरटी': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'कॉपर-टी' },
     'नसबंदी': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'नसबंदी' },
@@ -263,8 +262,20 @@ function parseHindiText(text) {
       // Look at the previous word (e.g., "25 साल")
       value = words[index - 1];
     } else {
-      // Look at the next word (e.g., "नाम राज")
-      value = words[index + 1];
+      // --- NEW LOGIC with Stop Word handling ---
+      const potentialValue = words[index + 1];
+
+      // Check if the next word is a stop word (e.g., "hai" in "naam hai Priya")
+      if (potentialValue && stopWords.has(potentialValue)) {
+        // If it is, look ahead to the word AFTER the stop word
+        const lookAheadValue = words[index + 2];
+        if (lookAheadValue && !stopWords.has(lookAheadValue)) {
+          value = lookAheadValue;
+        }
+      } else {
+        // If it's not a stop word, use it directly
+        value = potentialValue;
+      }
     }
 
     // Convert to number if needed
