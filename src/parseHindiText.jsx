@@ -1,299 +1,98 @@
-// We need to import the data template to use it here.
 import getNewVisitDataTemplate from './dataTemplate';
+import keywords from './keywords';
 
 function parseHindiText(text) {
-  // Initialize our new, structured data object.
   const data = getNewVisitDataTemplate();
-  // Add input validation to prevent the error
   if (!text || typeof text !== 'string') {
     console.warn('parseHindiText received invalid input:', text);
-    return getNewVisitDataTemplate(); // Return empty template if text is invalid
+    return data;
   }
-  // Clean and split the text into words
+
   const words = text.replace(/[.,!?]/g, '').toLowerCase().split(/\s+/);
-  
-  const stopWords = new Set(['है', 'हैं', 'था', 'थी', 'थे', 'का', 'की', 'को', 'से', 'में', 'और', 'ये', 'वह', 'इस', 'उसका', 'उसकी']);
+  const stopWords = new Set(['है', 'हैं', 'था', 'थी', 'थे', 'का', 'की', 'को', 'में', 'और', 'ये', 'वह', 'इस', 'उसका', 'उसकी']);
 
-  // --- COMPREHENSIVE KEYWORDS MAPPING ---
-  const keywords = {
-    // ===== BASIC INFO =====
-    'नाम': { field: 'basicInfo.patientName', type: 'string' },
-    'नामका': { field: 'basicInfo.patientName', type: 'string' },
-    'मरीज़का': { field: 'basicInfo.patientName', type: 'string' },
-    'मरीज': { field: 'basicInfo.patientName', type: 'string' },
-    'रोगी': { field: 'basicInfo.patientName', type: 'string' },
-    
-    'उम्र': { field: 'basicInfo.age', type: 'number' },
-    'आयु': { field: 'basicInfo.age', type: 'number' },
-    'साल': { field: 'basicInfo.age', type: 'number', isSuffix: true },
-    'वर्ष': { field: 'basicInfo.age', type: 'number', isSuffix: true },
-    'साला': { field: 'basicInfo.age', type: 'number', isSuffix: true },
-    
-    'लिंग': { field: 'basicInfo.gender', type: 'string' },
-    'जेंडर': { field: 'basicInfo.gender', type: 'string' },
-    'पुरुष': { field: 'basicInfo.gender', type: 'boolean', value: 'पुरुष' },
-    'महिला': { field: 'basicInfo.gender', type: 'boolean', value: 'महिला' },
-    'मर्द': { field: 'basicInfo.gender', type: 'boolean', value: 'पुरुष' },
-    'औरत': { field: 'basicInfo.gender', type: 'boolean', value: 'महिला' },
-    
-    'पता': { field: 'basicInfo.address', type: 'string' },
-    'पतेका': { field: 'basicInfo.address', type: 'string' },
-    'घर': { field: 'basicInfo.address', type: 'string' },
-    'निवास': { field: 'basicInfo.address', type: 'string' },
-    'रहता': { field: 'basicInfo.address', type: 'string' },
-    'रहती': { field: 'basicInfo.address', type: 'string' },
-    
-    'फोन': { field: 'basicInfo.phone', type: 'string' },
-    'मोबाइल': { field: 'basicInfo.phone', type: 'string' },
-    'नंबर': { field: 'basicInfo.phone', type: 'string' },
-    'संपर्क': { field: 'basicInfo.phone', type: 'string' },
-    'कॉल': { field: 'basicInfo.phone', type: 'string' },
-
-    // ===== MATERNAL HEALTH =====
-    'गर्भवती': { field: 'maternalHealth.isPregnant', type: 'boolean', value: 'हां' },
-    'गर्भ': { field: 'maternalHealth.isPregnant', type: 'boolean', value: 'हां' },
-    'पेटसे': { field: 'maternalHealth.isPregnant', type: 'boolean', value: 'हां' },
-    'प्रेगनेंट': { field: 'maternalHealth.isPregnant', type: 'boolean', value: 'हां' },
-    'हामिल': { field: 'maternalHealth.isPregnant', type: 'boolean', value: 'हां' },
-    'बच्चाआने': { field: 'maternalHealth.isPregnant', type: 'boolean', value: 'हां' },
-    
-    'एलएमपी': { field: 'maternalHealth.lmpDate', type: 'string' },
-    'लास्टपीरियड': { field: 'maternalHealth.lmpDate', type: 'string' },
-    'आखिरीमासिक': { field: 'maternalHealth.lmpDate', type: 'string' },
-    'पिछलामहीना': { field: 'maternalHealth.lmpDate', type: 'string' },
-    'मासिकधर्म': { field: 'maternalHealth.lmpDate', type: 'string' },
-    
-    'ईडीडी': { field: 'maternalHealth.edd', type: 'string' },
-    'डिलीवरी': { field: 'maternalHealth.edd', type: 'string' },
-    'जन्मकीतारीख': { field: 'maternalHealth.edd', type: 'string' },
-    'प्रसवकीतारीख': { field: 'maternalHealth.edd', type: 'string' },
-    
-    'एएनसी': { field: 'maternalHealth.ancVisits', type: 'number' },
-    'चेकअप': { field: 'maternalHealth.ancVisits', type: 'number' },
-    'जांच': { field: 'maternalHealth.ancVisits', type: 'number' },
-    'विजिट': { field: 'maternalHealth.ancVisits', type: 'number' },
-    'मुलाकात': { field: 'maternalHealth.ancVisits', type: 'number' },
-    
-    // High Risk Factors
-    'उच्चजोखिम': { field: 'maternalHealth.highRiskFactors', type: 'flag', value: 'उच्च जोखिम' },
-    'खतरा': { field: 'maternalHealth.highRiskFactors', type: 'flag', value: 'जोखिम कारक' },
-    'उच्चरक्तचाप': { field: 'maternalHealth.highRiskFactors', type: 'flag', value: 'उच्च रक्तचाप' },
-    'डायबिटीज': { field: 'maternalHealth.highRiskFactors', type: 'flag', value: 'मधुमेह' },
-    'मधुमेह': { field: 'maternalHealth.highRiskFactors', type: 'flag', value: 'मधुमेह' },
-    'एनीमिया': { field: 'maternalHealth.highRiskFactors', type: 'flag', value: 'एनीमिया' },
-    'खून': { field: 'maternalHealth.highRiskFactors', type: 'flag', value: 'रक्त संबंधी समस्या' },
-
-    // ===== CHILD HEALTH =====
-    'बच्चा': { field: 'childHealth.childName', type: 'string' },
-    'शिशु': { field: 'childHealth.childName', type: 'string' },
-    'बच्ची': { field: 'childHealth.childName', type: 'string' },
-    'बेटा': { field: 'childHealth.childName', type: 'string' },
-    'बेटी': { field: 'childHealth.childName', type: 'string' },
-    'लड़का': { field: 'childHealth.childName', type: 'string' },
-    'लड़की': { field: 'childHealth.childName', type: 'string' },
-    
-    'वजन': { field: 'childHealth.weight', type: 'string' },
-    'भार': { field: 'childHealth.weight', type: 'string' },
-    'वेट': { field: 'childHealth.weight', type: 'string' },
-    'किलो': { field: 'childHealth.weight', type: 'string', isSuffix: true },
-    'ग्राम': { field: 'childHealth.weight', type: 'string', isSuffix: true },
-    
-    'कुपोषण': { field: 'childHealth.isMalnourished', type: 'boolean', value: 'हां' },
-    'कुपोषित': { field: 'childHealth.isMalnourished', type: 'boolean', value: 'हां' },
-    'पतला': { field: 'childHealth.isMalnourished', type: 'boolean', value: 'हां' },
-    'कमजोर': { field: 'childHealth.isMalnourished', type: 'boolean', value: 'हां' },
-    'दुबला': { field: 'childHealth.isMalnourished', type: 'boolean', value: 'हां' },
-    
-    // Child Illness Symptoms
-    'बच्चेकीबीमारी': { field: 'childHealth.illnessSymptoms', type: 'flag', value: 'सामान्य बीमारी' },
-    'डायरिया': { field: 'childHealth.illnessSymptoms', type: 'flag', value: 'डायरिया' },
-    'सांस की तकलीफ': { field: 'childHealth.illnessSymptoms', type: 'flag', value: 'सांस की तकलीफ' },
-    'निमोनिया': { field: 'childHealth.illnessSymptoms', type: 'flag', value: 'निमोनिया' },
-
-    // ===== IMMUNIZATION =====
-    'टीका': { field: 'immunization.lastVaccine', type: 'string' },
-    'टीकाकरण': { field: 'immunization.lastVaccine', type: 'string' },
-    'वैक्सीन': { field: 'immunization.lastVaccine', type: 'string' },
-    'इंजेक्शन': { field: 'immunization.lastVaccine', type: 'string' },
-    'बीसीजी': { field: 'immunization.lastVaccine', type: 'boolean', value: 'BCG' },
-    'डीपीटी': { field: 'immunization.lastVaccine', type: 'boolean', value: 'DPT' },
-    'पोलियो': { field: 'immunization.lastVaccine', type: 'boolean', value: 'पोलियो' },
-    'खसरा': { field: 'immunization.lastVaccine', type: 'boolean', value: 'खसरा' },
-    'एमएमआर': { field: 'immunization.lastVaccine', type: 'boolean', value: 'MMR' },
-    
-    'अगलाटीका': { field: 'immunization.nextVaccineDate', type: 'string' },
-    'नेक्स्टवैक्सीन': { field: 'immunization.nextVaccineDate', type: 'string' },
-    'आनेवालाटीका': { field: 'immunization.nextVaccineDate', type: 'string' },
-
-    // ===== GENERAL HEALTH =====
-    'परिवार': { field: 'generalHealth.familyMembers', type: 'number' },
-    'परिवारकेसदस्य': { field: 'generalHealth.familyMembers', type: 'number' },
-    'घरमेंकितने': { field: 'generalHealth.familyMembers', type: 'number' },
-    'कुलसदस्य': { field: 'generalHealth.familyMembers', type: 'number' },
-    
-    // Chronic Illness
-    'पुरानीबीमारी': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'पुरानी बीमारी' },
-    'लंबीबीमारी': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'लंबी बीमारी' },
-    'शुगर': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'मधुमेह' },
-    'हाईबीपी': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'उच्च रक्तचाप' },
-    'दिल': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'हृदय रोग' },
-    'हार्ट': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'हृदय रोग' },
-    'किडनी': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'किडनी रोग' },
-    'लिवर': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'लिवर रोग' },
-    'जिगर': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'लिवर रोग' },
-    'अस्थमा': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'अस्थमा' },
-    'दमा': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'अस्थमा' },
-    
-    // Current Symptoms - Comprehensive
-    'बुखार': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'बुखार' },
-    'तेज़बुखार': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'तेज़ बुखार' },
-    'खांसी': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'खांसी' },
-    'सूखीखांसी': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'सूखी खांसी' },
-    'कफ': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'कफ' },
-    'कमजोरी': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'कमजोरी' },
-    'थकान': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'थकान' },
-    'दर्द': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'दर्द' },
-    'सिरदर्द': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'सिरदर्द' },
-    'पेट दर्द': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'पेट दर्द' },
-    'छातीदर्द': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'छाती दर्द' },
-    'जोड़ोंदर्द': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'जोड़ों का दर्द' },
-    'चक्कर': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'चक्कर आना' },
-    'जीमिचलाना': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'जी मिचलाना' },
-    'उल्टी': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'उल्टी' },
-    'दस्त': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'दस्त' },
-    'कब्ज': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'कब्ज' },
-    'खुजली': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'खुजली' },
-    'रैश': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'रैश' },
-    'सूजन': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'सूजन' },
-    'घबराहट': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'घबराहट' },
-
-    // ===== TREATMENT =====
-    'दवाई': { field: 'treatment.medicineProvided', type: 'array' },
-    'दवा': { field: 'treatment.medicineProvided', type: 'array' },
-    'गोली': { field: 'treatment.medicineProvided', type: 'array' },
-    'टैबलेट': { field: 'treatment.medicineProvided', type: 'array' },
-    'सिरप': { field: 'treatment.medicineProvided', type: 'array' },
-    'मेडिसिन': { field: 'treatment.medicineProvided', type: 'array' },
-    'इलाज': { field: 'treatment.medicineProvided', type: 'array' },
-    'पैरासिटामोल': { field: 'treatment.medicineProvided', type: 'flag', value: 'पैरासिटामोल' },
-    'एस्प्रिन': { field: 'treatment.medicineProvided', type: 'flag', value: 'एस्प्रिन' },
-    'एंटीबायोटिक': { field: 'treatment.medicineProvided', type: 'flag', value: 'एंटीबायोटिक' },
-    'आयरन': { field: 'treatment.medicineProvided', type: 'flag', value: 'आयरन टैबलेट' },
-    'कैल्शियम': { field: 'treatment.medicineProvided', type: 'flag', value: 'कैल्शियम' },
-    'विटामिन': { field: 'treatment.medicineProvided', type: 'flag', value: 'विटामिन' },
-    'ओआरएस': { field: 'treatment.medicineProvided', type: 'flag', value: 'ORS' },
-    
-    'रेफर': { field: 'treatment.isReferred', type: 'boolean', value: 'हां' },
-    'भेजा': { field: 'treatment.isReferred', type: 'boolean', value: 'हां' },
-    'अस्पताल': { field: 'treatment.isReferred', type: 'boolean', value: 'हां' },
-    'डॉक्टर': { field: 'treatment.isReferred', type: 'boolean', value: 'हां' },
-    'स्पेशलिस्ट': { field: 'treatment.isReferred', type: 'boolean', value: 'हां' },
-    
-    'रेफरलप्लेस': { field: 'treatment.referralPlace', type: 'string' },
-    'कहांभेजा': { field: 'treatment.referralPlace', type: 'string' },
-    'कौनसाअस्पताल': { field: 'treatment.referralPlace', type: 'string' },
-    'प्राइमरी': { field: 'treatment.referralPlace', type: 'boolean', value: 'प्राइमरी हेल्थ सेंटर' },
-    'सीएचसी': { field: 'treatment.referralPlace', type: 'boolean', value: 'कम्युनिटी हेल्थ सेंटर' },
-    'जिलाअस्पताल': { field: 'treatment.referralPlace', type: 'boolean', value: 'जिला अस्पताल' },
-    
-    'फॉलोअप': { field: 'treatment.nextFollowUp', type: 'string' },
-    'अगलीमुलाकात': { field: 'treatment.nextFollowUp', type: 'string' },
-    'दोबारा': { field: 'treatment.nextFollowUp', type: 'string' },
-    'फिरआना': { field: 'treatment.nextFollowUp', type: 'string' },
-    'नेक्स्ट': { field: 'treatment.nextFollowUp', type: 'string' },
-
-    // ===== FAMILY PLANNING =====
-    'परिवारनियोजन': { field: 'familyPlanning.contraceptionMethod', type: 'string' },
-    'फैमिलीप्लानिंग': { field: 'familyPlanning.contraceptionMethod', type: 'string' },
-    'गर्भनिरोध': { field: 'familyPlanning.contraceptionMethod', type: 'string' },
-    'कॉन्ट्रासेप्शन': { field: 'familyPlanning.contraceptionMethod', type: 'string' },
-    'कंडोम': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'कंडोम' },
-    'गर्भनिरोधकगोली': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'गर्भनिरोधक गोली' },
-    'गर्भनिरोधकइंजेक्शन': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'इंजेक्शन' },
-    'आईयूडी': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'IUD' },
-    'कॉपरटी': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'कॉपर-टी' },
-    'नसबंदी': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'नसबंदी' },
-  };
-
-  // --- DETERMINE VISIT TYPE BASED ON CONTEXT ---
-  if (words.some(word => ['गर्भवती', 'गर्भ', 'पेटसे', 'प्रेगनेंट', 'हामिल', 'बच्चाआने'].includes(word))) {
+  // --- DETERMINE VISIT TYPE ---
+  // This now checks if any of the matched keywords belong to the maternal or child health categories.
+  const matchedKeywords = words.map(word => keywords[word]).filter(Boolean);
+  if (matchedKeywords.some(kw => kw.field.startsWith('maternalHealth'))) {
     data.visitType = 'Maternal';
-    data.maternalHealth.isPregnant = 'हां';
-  } else if (words.some(word => ['बच्चा', 'शिशु', 'बच्ची', 'बेटा', 'बेटी', 'लड़का', 'लड़की'].includes(word))) {
+  } else if (matchedKeywords.some(kw => kw.field.startsWith('childHealth'))) {
     data.visitType = 'Child';
   }
 
-  // --- UTILITY FUNCTIONS ---
   const setNestedValue = (path, value) => {
     const keys = path.split('.');
     let obj = data;
-    
-    // Navigate to the parent object
-    for (let i = 0; i < keys.length - 1; i++) {
-      obj = obj[keys[i]];
-    }
-    
+    for (let i = 0; i < keys.length - 1; i++) { obj = obj[keys[i]]; }
     const finalKey = keys[keys.length - 1];
-    
-    // Handle arrays differently
     if (Array.isArray(obj[finalKey])) {
-      if (!obj[finalKey].includes(value)) {
-        obj[finalKey].push(value);
-      }
+      if (!obj[finalKey].includes(value)) { obj[finalKey].push(value); }
     } else {
       obj[finalKey] = value;
     }
   };
 
-  // --- PARSE AND POPULATE DATA ---
-  words.forEach((word, index) => {
-    const mapping = keywords[word];
-    if (!mapping) return;
+  // --- NEW: PHRASE-AWARE PARSING LOOP ---
+  // We use a standard for loop so we can control the index `i` and skip ahead
+  // after matching a multi-word phrase.
+  for (let i = 0; i < words.length; i++) {
+    // Construct potential 2-word and 1-word phrases starting at the current word.
+    const twoWordPhrase = words.slice(i, i + 2).join(' ');
+    const oneWordPhrase = words[i];
 
-    let value;
-    
-    if (mapping.type === 'flag') {
-      // For flags, use the predefined value
-      value = mapping.value;
-    } else if (mapping.type === 'boolean') {
-      // For boolean triggers, use the predefined value
-      value = mapping.value;
-    } else if (mapping.isSuffix) {
-      // Look at the previous word (e.g., "25 साल")
-      value = words[index - 1];
-    } else {
-      // --- NEW LOGIC with Stop Word handling ---
-      const potentialValue = words[index + 1];
+    let mapping = null;
+    let phraseLength = 0;
 
-      // Check if the next word is a stop word (e.g., "hai" in "naam hai Priya")
-      if (potentialValue && stopWords.has(potentialValue)) {
-        // If it is, look ahead to the word AFTER the stop word
-        const lookAheadValue = words[index + 2];
-        if (lookAheadValue && !stopWords.has(lookAheadValue)) {
-          value = lookAheadValue;
-        }
+    // IMPORTANT: Check for the longest phrase first (2 words), then fall back to 1 word.
+    if (keywords[twoWordPhrase]) {
+      mapping = keywords[twoWordPhrase];
+      phraseLength = 2;
+    } else if (keywords[oneWordPhrase]) {
+      mapping = keywords[oneWordPhrase];
+      phraseLength = 1;
+    }
+
+    // If we found a match (either 1 or 2 words)
+    if (mapping) {
+      let value;
+
+      if (mapping.type === 'flag' || mapping.type === 'boolean') {
+        value = mapping.value;
+      } else if (mapping.isSuffix) {
+        // Look at the word BEFORE the matched phrase
+        value = words[i - 1];
       } else {
-        // If it's not a stop word, use it directly
-        value = potentialValue;
+        // Look for the value AFTER the matched phrase
+        const valueIndex = i + phraseLength; // The position right after our keyword
+        const potentialValue = words[valueIndex];
+
+        if (potentialValue && stopWords.has(potentialValue)) {
+          const lookAheadValue = words[valueIndex + 1];
+          if (lookAheadValue && !stopWords.has(lookAheadValue)) {
+            value = lookAheadValue;
+          }
+        } else {
+          value = potentialValue;
+        }
       }
-    }
 
-    // Convert to number if needed
-    if (mapping.type === 'number' && value) {
-      const num = parseInt(value, 10);
-      if (!isNaN(num)) {
-        value = num;
+      if (mapping.type === 'number' && value) {
+        const num = parseInt(value, 10);
+        if (!isNaN(num)) { value = num; }
       }
-    }
 
-    // Set the value if we found something valid
-    if (value !== undefined && value !== null && value !== '') {
-      setNestedValue(mapping.field, value);
-    }
-  });
+      if (value !== undefined && value !== null && value !== '') {
+        setNestedValue(mapping.field, value);
+      }
 
-  console.log("--- ENHANCED PARSED DATA ---", data);
+      // CRUCIAL: Advance the loop index to jump past the phrase we just processed.
+      i += phraseLength - 1;
+    }
+  }
+
+  console.log("--- PHRASE-AWARE PARSED DATA ---", data);
   return data;
 }
 
 export default parseHindiText;
+

@@ -53,6 +53,18 @@ const HomePage = ({
                 <DetailRow label="Age" value={parsedData.basicInfo.age} fieldPath="basicInfo.age" inputType="number" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
                 <DetailRow label="Gender" value={parsedData.basicInfo.gender} fieldPath="basicInfo.gender" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
                 <DetailRow label="Visit Date" value={parsedData.basicInfo.visitDate} fieldPath="basicInfo.visitDate" inputType="date" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                <DetailRow label="Mobile Number"
+                value={parsedData.basicInfo.mobile}
+                fieldPath="basicInfo.mobile"
+                inputType="tel"
+                {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }}
+              />
+              <DetailRow label="Address"
+                value={parsedData.basicInfo.address}
+                fieldPath="basicInfo.address"
+                inputType="text"
+                {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }}
+              />
             </div>
 
             {/* --- SECTION 2: MATERNAL HEALTH (Conditional) --- */}
@@ -68,7 +80,6 @@ const HomePage = ({
             {parsedData.visitType === 'Child' && (
                 <div className="confirmation-section">
                 <h3>Child Health</h3>
-                <DetailRow label="Child's Name" value={parsedData.childHealth.childName} fieldPath="childHealth.childName" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
                 <DetailRow label="Weight" value={parsedData.childHealth.weight} fieldPath="childHealth.weight" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
                 </div>
             )}
