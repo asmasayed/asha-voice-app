@@ -121,7 +121,7 @@ function App() {
           <p>ASHA Voice Assistant</p>
         </header>
         
-        <main>
+        <main className="container">
           {activePage === 'home' && (
             <HomePage
               parsedData={parsedData}
