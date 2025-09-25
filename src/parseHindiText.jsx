@@ -6,28 +6,33 @@ function parseHindiText(text) {
   const data = getNewVisitDataTemplate();
   const words = text.replace(/[.,]/g, '').toLowerCase().split(/\s+/);
 
-  // --- 1. DEFINE KEYWORDS ---
+  // --- 1. DEFINE KEYWORDS (with the new 'flag' type) ---
   const keywords = {
-    // ... (your keywords object remains the same) ...
+    // Basic Info
     'नाम': { field: 'basicInfo.patientName', type: 'string' },
     'उम्र': { field: 'basicInfo.age', type: 'number' },
     'साल': { field: 'basicInfo.age', type: 'number', isSuffix: true },
     'लिंग': { field: 'basicInfo.gender', type: 'string' },
     'पता': { field: 'basicInfo.address', type: 'string' },
     'फोन': { field: 'basicInfo.phone', type: 'string' },
+    // Maternal Health Triggers
     'गर्भवती': { field: 'maternalHealth.isPregnant', type: 'boolean', value: 'Yes' },
     'पेट से': { field: 'maternalHealth.isPregnant', type: 'boolean', value: 'Yes' },
     'एलएमपी': { field: 'maternalHealth.lmpDate', type: 'string' },
     'एएनसी': { field: 'maternalHealth.ancVisits', type: 'number' },
+    // Child Health Triggers
     'बच्चा': { field: 'childHealth.childName', type: 'string' },
     'शिशु': { field: 'childHealth.childName', type: 'string' },
     'वजन': { field: 'childHealth.weight', type: 'string' },
+    // Other fields
     'टीका': { field: 'immunization.lastVaccine', type: 'string' },
     'दवाई': { field: 'treatment.medicineProvided', type: 'array' },
     'रेफर': { field: 'treatment.isReferred', type: 'boolean', value: 'Yes' },
-    'बुखार': { field: 'generalHealth.currentSymptoms', type: 'array' },
-    'खांसी': { field: 'generalHealth.currentSymptoms', type: 'array' },
-    'कमजोरी': { field: 'generalHealth.currentSymptoms', type: 'array' },
+    // SYMPTOMS ARE NOW FLAGS
+    'बुखार': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'fever' },
+    'खांसी': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'cough' },
+    'कमजोरी': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'weakness' },
+    'दर्द': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'pain' },
   };
 
   // --- 2. DETERMINE VISIT TYPE ---
@@ -50,14 +55,19 @@ function parseHindiText(text) {
         obj = obj[keys[i]];
       }
       if (Array.isArray(obj[keys[keys.length - 1]])) {
-        obj[keys[keys.length - 1]].push(value);
+        if (!obj[keys[keys.length - 1]].includes(value)) { // Prevent duplicate symptoms
+          obj[keys[keys.length - 1]].push(value);
+        }
       } else {
         obj[keys[keys.length - 1]] = value;
       }
     };
     
+    // UPDATED LOGIC to handle different keyword types
     let value;
-    if (mapping.type === 'boolean') {
+    if (mapping.type === 'flag') {
+      value = mapping.value;
+    } else if (mapping.type === 'boolean') {
       value = mapping.value;
     } else if (mapping.isSuffix) {
       value = words[index - 1];
