@@ -9,19 +9,19 @@ const Navbar = ({ activePage, onNavigate }) => {
         className={activePage === 'home' ? 'active' : ''} 
         onClick={() => onNavigate('home')}
       >
-        🏠 Home
+        Home
       </button>
       <button 
         className={activePage === 'visits' ? 'active' : ''} 
         onClick={() => onNavigate('visits')}
       >
-        📋 Visits Log
+        Visits Log
       </button>
       <button 
         className={activePage === 'schemes' ? 'active' : ''} 
         onClick={() => onNavigate('schemes')}
       >
-        💡 Schemes
+        Schemes
       </button>
     </nav>
   );
