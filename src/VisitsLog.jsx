@@ -1,10 +1,39 @@
 import React from 'react';
+import './VisitsLog.css'
 
-const VisitsLog = () => {
+// The component now accepts { visits } as a prop
+const VisitsLog = ({ visits, onViewDetails }) => {
   return (
-    <div className="card page-content">
-      <h2>Visits Log</h2>
-      <p>All your saved patient visits will be displayed here.</p>
+    <div className="page-content">
+      <h2>Past Visits</h2>
+
+      {/* A helpful message if there are no visits */}
+      {visits.length === 0 ? (
+        <p>No visits have been recorded yet.</p>
+      ) : (
+        // A container for our list of visit cards
+        <div className="visits-list">
+          {/* We use .map() to loop over the visits array */}
+          {visits.map((visit) => (
+            // Each card needs a unique key, we'll use the visit's Firestore ID
+            <div key={visit.id} className="visit-card card">
+              <div className="visit-card-header">
+                {/* Display the patient's name and age */}
+                <h3>{visit.basicInfo?.name || 'Unknown Patient'}</h3>
+                <p>{visit.basicInfo?.age || 'N/A'} years old</p>
+              </div>
+              <div className="visit-card-body">
+                {/* Display the visit type */}
+                <p><strong>Visit Type:</strong> {visit.visitType || 'General'}</p>
+              </div>
+              <div className="visit-card-footer">
+                {/* This button will be for our next feature */}
+                <button className="btn btn-primary" onClick={() => onViewDetails(visit)}>View Details</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

@@ -1,0 +1,53 @@
+/* === Visits Log Page Styles === */
+
+.visits-list {
+  display: grid;
+  grid-template-columns: 1fr; /* One column on mobile */
+  gap: 1.5rem;
+  text-align: left;
+}
+
+.visit-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.visit-card-header h3 {
+  margin: 0 0 0.25rem 0;
+  color: var(--primary-color);
+}
+
+.visit-card-header p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.visit-card-body {
+  margin: 1rem 0;
+  flex-grow: 1; /* Pushes the footer to the bottom */
+}
+
+.visit-card-body p {
+  margin: 0.5rem 0;
+}
+
+.visit-card-footer {
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.visit-card-footer .btn {
+  width: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* Make the grid two columns on tablets and larger screens */
+@media (min-width: 768px) {
+  .visits-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

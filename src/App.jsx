@@ -1,75 +1,107 @@
 import { useState, useRef, useEffect } from 'react';
 import './App.css';
 
-// --- UPDATED IMPORTS WITH FILE EXTENSIONS ---
-import parseHindiText from './parseHindiText.jsx';
-import Navbar from './Navbar.jsx';
-import VisitsLog from './VisitsLog.jsx';
-import Schemes from './Schemes.jsx';
-import HomePage from './homepage.jsx';
-import AuthPage from './AuthPage.jsx';
-import { auth } from './firebase.js';
+// --- UPDATED IMPORTS (REMOVED .jsx/.js extensions) ---
+// Some build tools prefer imports without file extensions.
+import parseHindiText from './parseHindiText';
+import Navbar from './Navbar';
+import VisitsLog from './VisitsLog';
+import Schemes from './Schemes';
+import HomePage from './homepage';
+import AuthPage from './AuthPage';
+import { auth, db } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { collection, addDoc, serverTimestamp, query, onSnapshot } from "firebase/firestore";
+import VisitDetailModal from './VisitDetailModal';
 
 function App() {
-  // State for Authentication
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [visits, setVisits] = useState([]);
 
-  // State for Application Logic
+  // --- All other state remains the same ---
   const [activePage, setActivePage] = useState('home');
   const [transcribedText, setTranscribedText] = useState('');
   const [recordingStatus, setRecordingStatus] = useState('idle');
   const [parsedData, setParsedData] = useState(null);
   const [editingField, setEditingField] = useState(null);
-  const [visits, setVisits] = useState([]);
-
-  // Refs
   const recognitionRef = useRef(null);
   const accumulatedTranscriptRef = useRef('');
   const transcriptBoxRef = useRef(null);
+  const [selectedVisit, setSelectedVisit] = useState(null);
 
-  // --- THIS IS THE CRITICAL AUTHENTICATION LISTENER ---
-  // This hook now includes console logs so we can see it work.
+  // --- NEW COMBINED useEffect FOR AUTH AND DATA FETCHING ---
+  // This single hook handles both checking the user's login status
+  // and fetching their data in the correct order.
   useEffect(() => {
-    console.log("Setting up Firebase auth listener...");
-    
-    // onAuthStateChanged returns an "unsubscribe" function.
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      // This code will run whenever a user logs in or logs out.
-      console.log("Firebase Auth state changed! Current user is:", user ? user.email : 'null');
-      
-      setCurrentUser(user); // Update the state with the user object or null
-      setIsLoading(false); // We're done checking, so stop showing the loading screen
+    // This variable will hold the function to unsubscribe from the visits listener
+    let unsubscribeFromVisits = () => {};
+
+    // First, set up the listener for authentication changes
+    const unsubscribeFromAuth = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user); // Set the current user (or null if logged out)
+
+      if (user) {
+        // --- IF A USER IS LOGGED IN ---
+        // 1. Create a query to get their specific visits collection
+        const visitsQuery = query(collection(db, "users", user.uid, "visits"));
+        
+        // 2. Set up the real-time listener for their visits
+        unsubscribeFromVisits = onSnapshot(visitsQuery, (querySnapshot) => {
+          const visitsData = [];
+          querySnapshot.forEach((doc) => {
+            visitsData.push({ ...doc.data(), id: doc.id });
+          });
+          setVisits(visitsData); // Update the state with the new data
+        });
+
+      } else {
+        // --- IF NO USER IS LOGGED IN ---
+        setVisits([]); // Ensure the visits list is empty
+      }
+
+      // Finally, set loading to false. This happens after the auth check is complete.
+      setIsLoading(false);
     });
 
-    // This is the cleanup function. It runs when the component is removed.
+    // This is the main cleanup function for the hook.
+    // It will be called when the component is unmounted.
     return () => {
-      console.log("Cleaning up Firebase auth listener.");
-      unsubscribe();
+      unsubscribeFromAuth(); // Unsubscribe from the authentication listener
+      unsubscribeFromVisits(); // Unsubscribe from the visits listener
     };
-  }, []); // The empty array [] means this effect runs only ONCE when the app starts.
+  }, []); // The empty array [] ensures this effect runs only once when the app starts.
+  
 
-  // Effect for auto-scrolling the transcript box
-  useEffect(() => {
-    if (transcriptBoxRef.current) {
-      transcriptBoxRef.current.scrollTop = transcriptBoxRef.current.scrollHeight;
+  const handleConfirm = async () => {
+    if (!currentUser) {
+      console.error("No user logged in to save visit.");
+      return;
     }
-  }, [transcribedText]);
-
-  // --- Handler Functions ---
+    try {
+      const visitsCollectionRef = collection(db, "users", currentUser.uid, "visits");
+      await addDoc(visitsCollectionRef, {
+        ...parsedData,
+        createdAt: serverTimestamp(),
+        userId: currentUser.uid
+      });
+      setParsedData(null);
+      setTranscribedText('');
+      setActivePage('visits');
+    } catch (error) {
+      console.error("Error saving visit to Firestore:", error);
+    }
+  };
+  
+  // --- All other handler functions and render logic below this line are unchanged ---
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      // The listener above will automatically set currentUser to null, showing the login page.
     } catch (error) {
       console.error("Error signing out:", error);
     }
   };
-  
-  // All your other handler functions (handleStartOrResume, handleConfirm, etc.)
-  // do not need any changes. They are copied below as-is.
 
   const handleStartOrResume = () => {
     accumulatedTranscriptRef.current = transcribedText;
@@ -113,13 +145,6 @@ function App() {
     accumulatedTranscriptRef.current = '';
   };
 
-  const handleConfirm = () => {
-    setVisits(prevVisits => [...prevVisits, parsedData]);
-    setParsedData(null);
-    setTranscribedText('');
-    setActivePage('visits');
-  };
-
   const handleRetry = () => {
     setParsedData(null);
     setTranscribedText('');
@@ -154,8 +179,15 @@ function App() {
     setActivePage(page);
   };
 
+  const handleViewDetails = (visit) => {
+  console.log("Viewing details for visit:", visit);
+  setSelectedVisit(visit);
+  };  
 
-  // --- Render Logic ---
+  // This function will close the modal
+  const handleCloseModal = () => {
+    setSelectedVisit(null);
+  };
 
   if (isLoading) {
     return (
@@ -165,12 +197,10 @@ function App() {
     );
   }
 
-  // If the listener has run and confirmed there is no user, show the AuthPage
   if (!currentUser) {
     return <AuthPage />;
   }
 
-  // Otherwise, if there IS a user, show the main application
   return (
     <>
       <div className="container">
@@ -179,7 +209,6 @@ function App() {
           <p>ASHA Voice Assistant</p>
           <button onClick={handleLogout} className="btn btn-retry" style={{maxWidth: '150px', margin: '10px auto'}}>Log Out</button>
         </header>
-
         <main className="container">
           {activePage === 'home' && (
             <HomePage
@@ -198,11 +227,14 @@ function App() {
               handleCancelEdit={handleCancelEdit}
             />
           )}
-          {activePage === 'visits' && <VisitsLog visits={visits} />}
+          {activePage === 'visits' && <VisitsLog visits={visits} onViewDetails={handleViewDetails} />}
           {activePage === 'schemes' && <Schemes />}
         </main>
       </div>
       <Navbar activePage={activePage} onNavigate={handleNavigate} />
+      {/* --- Render the Modal if a visit is selected --- */}
+      <VisitDetailModal visit={selectedVisit} onClose={handleCloseModal} />
+
     </>
   );
 }
