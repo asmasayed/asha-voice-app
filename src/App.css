@@ -375,3 +375,109 @@ header p {
 .page-content {
   text-align: left;
 }
+
+
+/* === Authentication Page Styles === */
+
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f0f2f5; /* A light grey background */
+  padding: 20px;
+}
+
+.auth-form {
+  background-color: #ffffff;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px; /* Limits the width on larger screens */
+  transition: all 0.3s ease-in-out;
+}
+
+.auth-form h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #333;
+  text-align: center;
+  font-size: 1.75rem;
+}
+
+.input-group {
+  margin-bottom: 1.25rem;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #007bff; /* Highlight color on focus */
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  color: #555;
+}
+
+.checkbox-group input {
+  margin-right: 0.5rem;
+}
+
+.auth-form button {
+  width: 100%;
+  padding: 0.85rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #007bff; /* A nice blue for the primary button */
+  color: white;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.auth-form button:hover {
+  background-color: #0056b3; /* A darker blue on hover */
+}
+
+.toggle-form {
+  text-align: center;
+  margin-top: 1rem;
+  color: #555;
+}
+
+.toggle-form span {
+  color: #007bff;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.toggle-form span:hover {
+  text-decoration: underline;
+}
+
+.error-message {
+  color: #dc3545; /* A standard error red color */
+  text-align: center;
+  margin-top: 1rem;
+  font-weight: 500;
+}
