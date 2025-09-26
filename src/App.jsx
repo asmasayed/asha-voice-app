@@ -1,8 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import './App.css';
-
-// --- UPDATED IMPORTS (REMOVED .jsx/.js extensions) ---
-// Some build tools prefer imports without file extensions.
 import parseHindiText from './parseHindiText';
 import Navbar from './Navbar';
 import VisitsLog from './VisitsLog';
@@ -25,6 +22,15 @@ function App() {
   const [recordingStatus, setRecordingStatus] = useState('idle');
   const [parsedData, setParsedData] = useState(null);
   const [editingField, setEditingField] = useState(null);
+  
+  // 🚨 NEW SCHEME STATES 🚨
+  const [schemeQuery, setSchemeQuery] = useState(''); 
+  const [schemeResult, setSchemeResult] = useState(null); 
+  // -----------------------
+
+  // Visit Log State (Placeholder for future Local Storage implementation)
+  const [savedVisits, setSavedVisits] = useState([]); 
+
   const recognitionRef = useRef(null);
   const accumulatedTranscriptRef = useRef('');
   const transcriptBoxRef = useRef(null);
@@ -176,6 +182,7 @@ function App() {
   };
 
   const handleNavigate = (page) => {
+    if (recognitionRef.current) recognitionRef.current.stop();
     setActivePage(page);
   };
 
@@ -228,7 +235,19 @@ function App() {
             />
           )}
           {activePage === 'visits' && <VisitsLog visits={visits} onViewDetails={handleViewDetails} />}
-          {activePage === 'schemes' && <Schemes />}
+          {/* 🚨 SCHEMES COMPONENT: Passing all necessary states/refs 🚨 */}
+          {activePage === 'schemes' && (
+            <Schemes 
+              schemeQuery={schemeQuery}
+              setSchemeQuery={setSchemeQuery}
+              schemeResult={schemeResult}
+              setSchemeResult={setSchemeResult}
+              recognitionRef={recognitionRef}
+              accumulatedTranscriptRef={accumulatedTranscriptRef}
+              recordingStatus={recordingStatus} // Passed down to be read/set as 'listening_scheme'
+              setRecordingStatus={setRecordingStatus}
+            />
+          )}
         </main>
       </div>
       <Navbar activePage={activePage} onNavigate={handleNavigate} />
