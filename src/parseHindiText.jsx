@@ -13,11 +13,29 @@ function parseHindiText(text) {
 
   // --- DETERMINE VISIT TYPE ---
   // This now checks if any of the matched keywords belong to the maternal or child health categories.
-  const matchedKeywords = words.map(word => keywords[word]).filter(Boolean);
-  if (matchedKeywords.some(kw => kw.field.startsWith('maternalHealth'))) {
-    data.visitType = 'Maternal';
-  } else if (matchedKeywords.some(kw => kw.field.startsWith('childHealth'))) {
-    data.visitType = 'Child';
+  for (let i = 0; i < words.length; i++) {
+    const twoWordPhrase = words.slice(i, i + 2).join(' ');
+    const oneWordPhrase = words[i];
+
+    let mapping = keywords[twoWordPhrase] || keywords[oneWordPhrase];
+
+    if (mapping) {
+      if (mapping.field.startsWith('maternalHealth')) {
+        data.visitType = 'Maternal';
+        // Once we know it's a maternal visit, we can stop looking.
+        break; 
+      }
+      if (mapping.field.startsWith('childHealth')) {
+        data.visitType = 'Child';
+        // Once we know it's a child visit, we can stop looking.
+        break;
+      }
+    }
+  }
+
+  // Set the isPregnant flag if the visit is determined to be Maternal
+  if (data.visitType === 'Maternal') {
+      data.maternalHealth.isPregnant = 'हां';
   }
 
   const setNestedValue = (path, value) => {
