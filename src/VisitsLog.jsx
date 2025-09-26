@@ -1,10 +1,14 @@
 import React from 'react';
 import './VisitsLog.css'
+import FollowUps from './FollowUps';
+
 
 // The component now accepts { visits } as a prop
 const VisitsLog = ({ visits, onViewDetails }) => {
   return (
     <div className="page-content">
+      <h2>Upcoming Follow Ups</h2>
+        <FollowUps userId={visits.id}/>
       <h2>Past Visits</h2>
 
       {/* A helpful message if there are no visits */}
