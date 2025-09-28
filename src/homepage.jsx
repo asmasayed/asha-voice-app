@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState} from  'react';
 
 // A reusable component for displaying and editing a single field.
 // It's kept here because it is only used by the HomePage.
@@ -40,10 +40,69 @@ const HomePage = ({
   handleEdit,
   handleSaveEdit,
   handleCancelEdit,
-  handleVisitTypeChange
+  handleVisitTypeChange,
+  onAddSpace
 }) => {
+  const [selectionToolbar, setSelectionToolbar] = useState({
+        visible: false,
+        top: 0,
+        left: 0,
+    });
+
+    // Helper to hide the toolbar
+    const hideToolbar = () => {
+        setSelectionToolbar({ visible: false, top: 0, left: 0 });
+    };
+
+    // This function detects when text is selected and shows the toolbar
+    const handleTextSelection = () => {
+        // Only allow editing when the mic is paused or idle
+        if (recordingStatus === 'listening') {
+            hideToolbar();
+            return;
+        }
+
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            const rect = range.getBoundingClientRect();
+
+            // Show the toolbar above the selected text or cursor position
+            setSelectionToolbar({
+                visible: true,
+                top: rect.top - 45 + window.scrollY,
+                left: rect.left + (rect.width / 2) + window.scrollX,
+            });
+        } else {
+            hideToolbar();
+        }
+    };
   return (
     <>
+      {selectionToolbar.visible && (
+       <div
+              className="selection-toolbar"
+              style={{ top: selectionToolbar.top, left: selectionToolbar.left }}
+          >
+              <button
+                  onClick={() => {
+                      const selection = window.getSelection();
+                      if (selection && selection.rangeCount > 0) {
+                          // Get the exact cursor position from the selection
+                          const cursorPosition = selection.getRangeAt(0).startOffset;
+                          // Call the onAddSpace function passed from App.jsx
+                          onAddSpace(cursorPosition);
+                      }
+                      // Hide the toolbar and clear the selection after use
+                      hideToolbar();
+                      selection.removeAllRanges();
+                  }}
+              >
+                  Add Space
+              </button>
+          </div>
+      )}
+
       {parsedData ? (
         <div className="card confirmation-card">
             <h2>Confirm Visit Details</h2>
@@ -122,20 +181,7 @@ const HomePage = ({
         </div>
       ) : (
         <div className="card recording-view">
-            {/* Visit Type Selector */}
-            <div className="visit-type-selector">
-                <label htmlFor="visitType">Visit Type:</label>
-                <select 
-                    id="visitType" 
-                    value={selectedVisitType} 
-                    onChange={handleVisitTypeChange}
-                    className="visit-type-dropdown"
-                >
-                    <option value="General">General</option>
-                    <option value="Maternal">Maternal</option>
-                    <option value="Child">Child</option>
-                </select>
-            </div>
+            
             
             <div className="button-group">
                 {recordingStatus === 'idle' && (
@@ -151,9 +197,10 @@ const HomePage = ({
                     <div className="mic-button is-recording">
                     <img src="/mic.png" alt="Recording icon" />
                     </div>
-                    <p className="recording-status">🎤 Recording - Speak naturally, all words are being captured</p>
                     <button onClick={handlePause} className="btn btn-pause">Pause</button>
                     <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
+                    
+            
                 </>
                 )}
                 {recordingStatus === 'paused' && (
@@ -167,8 +214,8 @@ const HomePage = ({
                 )}
             </div>
             {recordingStatus !== 'idle' && (
-                <div ref={transcriptBoxRef} className="transcript-box">
-                <p>{transcribedText}</p>
+                <div ref={transcriptBoxRef} className="transcript-box"  onMouseUp={handleTextSelection}>
+                <p>{transcribedText || "Your recorded text will appear here..."}</p>
                 </div>
             )}
         </div>

@@ -40,8 +40,10 @@ const keywords = {
     'दोबारा आना': { field: 'treatment.nextFollowUp', type: 'string' },
     'अगली तारीख': { field: 'treatment.nextFollowUp', type: 'string' },
     'अगले सप्ताह': { field: 'treatment.nextFollowUp', type: 'string' },
+    'अगला मिलना': { field: 'treatment.nextFollowUp', type: 'string' },
+    'अगला मिलन': { field: 'treatment.nextFollowUp', type: 'string' },
     'अगले महीने': { field: 'treatment.nextFollowUp', type: 'string' },
-
+    
 
     // ========================================================================
     // ===== CONTEXT-AWARE KEYWORDS (Meaning changes based on patient type) =====

@@ -277,6 +277,19 @@ function App() {
     }
   };  
 
+  const handleAddSpace = (cursorPosition) => {
+    // We receive cursorPosition as an argument, so we don't declare it again.
+    
+    if (typeof cursorPosition !== 'number') return;
+
+    const newTranscript = 
+        transcribedText.slice(0, cursorPosition) +
+        ' ' +
+        transcribedText.slice(cursorPosition);
+    
+    // Update the state with the corrected text
+    setTranscribedText(newTranscript);
+};
 
   if (isLoading) {
     return (
@@ -316,6 +329,7 @@ function App() {
               handleSaveEdit={handleSaveEdit}
               handleCancelEdit={handleCancelEdit}
               handleVisitTypeChange={handleVisitTypeChange}
+              onAddSpace={handleAddSpace}
             />
           )}
           {activePage === 'visits' && <VisitsLog visits={visits} onViewDetails={handleViewDetails} onDelete={handleDeleteVisit} user={currentUser}/>}

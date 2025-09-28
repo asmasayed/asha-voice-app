@@ -524,3 +524,38 @@ header p {
   margin-top: 1rem;
   font-weight: 500;
 }
+
+/* --- Selection Toolbar Styling --- */
+.selection-toolbar {
+    position: absolute;
+    transform: translateX(-50%); /* Helps center the toolbar */
+    background-color: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    transition: opacity 0.1s ease-in-out;
+}
+
+.selection-toolbar button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 5px;
+}
+
+.selection-toolbar button:hover {
+    background-color: #555;
+    border-radius: 4px;
+}
+
+/* Make the transcript text selectable */
+.transcript-display {
+    user-select: text; /* Or 'all' */
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+}
