@@ -45,6 +45,34 @@
   padding-right: 1.5rem;
 }
 
+.btn-danger {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s;
+}
+
+.btn-danger:hover {
+  background-color: #c0392b;
+}
+
+/* A little spacing between buttons */
+.visit-card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.visit-card-footer{
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
 /* Make the grid two columns on tablets and larger screens */
 @media (min-width: 768px) {
   .visits-list {

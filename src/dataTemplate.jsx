@@ -7,7 +7,7 @@ const getNewVisitDataTemplate = () => ({
     age: null,
     gender: null,
     address: null,
-    phone: null,
+    mobile: null,
     visitDate: new Date().toLocaleDateString('en-IN'), // Automatically set today's date
   },
 

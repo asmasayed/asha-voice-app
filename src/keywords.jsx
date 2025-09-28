@@ -1,202 +1,236 @@
-
-    const keywords = {
-    // ===== BASIC INFO =====
+const keywords = {
+    // ========================================================================
+    // ===== GLOBAL KEYWORDS (Always the same regardless of context) =====
+    // ========================================================================
     'नाम': { field: 'basicInfo.patientName', type: 'string' },
-    'नामका': { field: 'basicInfo.patientName', type: 'string' },
-    'मरीज़का': { field: 'basicInfo.patientName', type: 'string' },
-    'मरीज': { field: 'basicInfo.patientName', type: 'string' },
-    'रोगी': { field: 'basicInfo.patientName', type: 'string' },
-
+    'नाम है': { field: 'basicInfo.patientName', type: 'string' },
     'उम्र': { field: 'basicInfo.age', type: 'number' },
-    'आयु': { field: 'basicInfo.age', type: 'number' },
     'साल': { field: 'basicInfo.age', type: 'number', isSuffix: true },
-    'वर्ष': { field: 'basicInfo.age', type: 'number', isSuffix: true },
-    'साला': { field: 'basicInfo.age', type: 'number', isSuffix: true },
-
+    'साल का': { field: 'basicInfo.age', type: 'number', isSuffix: true },
+    'साल की': { field: 'basicInfo.age', type: 'number', isSuffix: true },
     'लिंग': { field: 'basicInfo.gender', type: 'string' },
-    'जेंडर': { field: 'basicInfo.gender', type: 'string' },
     'पुरुष': { field: 'basicInfo.gender', type: 'boolean', value: 'पुरुष' },
     'महिला': { field: 'basicInfo.gender', type: 'boolean', value: 'महिला' },
-    'मर्द': { field: 'basicInfo.gender', type: 'boolean', value: 'पुरुष' },
-    'औरत': { field: 'basicInfo.gender', type: 'boolean', value: 'महिला' },
-
     'पता': { field: 'basicInfo.address', type: 'string' },
-    'पतेका': { field: 'basicInfo.address', type: 'string' },
-    'घर': { field: 'basicInfo.address', type: 'string' },
-    'निवास': { field: 'basicInfo.address', type: 'string' },
-    'रहता': { field: 'basicInfo.address', type: 'string' },
-    'रहती': { field: 'basicInfo.address', type: 'string' },
-
-    'फोन': { field: 'basicInfo.phone', type: 'string' },
-    'मोबाइल': { field: 'basicInfo.phone', type: 'string' },
-    'नंबर': { field: 'basicInfo.phone', type: 'string' },
-    'संपर्क': { field: 'basicInfo.phone', type: 'string' },
-    'कॉल': { field: 'basicInfo.phone', type: 'string' },
-
-    // ===== MATERNAL HEALTH =====
-    'गर्भवती': { field: 'maternalHealth.isPregnant', type: 'boolean', value: 'हां' },
-    'गर्भ': { field: 'maternalHealth.isPregnant', type: 'boolean', value: 'हां' },
-    'पेट से': { field: 'maternalHealth.isPregnant', type: 'boolean', value: 'हां' },
-    'प्रेगनेंट': { field: 'maternalHealth.isPregnant', type: 'boolean', value: 'हां' },
-    'हामिल': { field: 'maternalHealth.isPregnant', type: 'boolean', value: 'हां' },
-    'बच्चाआने': { field: 'maternalHealth.isPregnant', type: 'boolean', value: 'हां' },
-
-    'एलएमपी': { field: 'maternalHealth.lmpDate', type: 'string' },
-    'लास्टपीरियड': { field: 'maternalHealth.lmpDate', type: 'string' },
-    'आखिरीमासिक': { field: 'maternalHealth.lmpDate', type: 'string' },
-    'पिछलामहीना': { field: 'maternalHealth.lmpDate', type: 'string' },
-    'मासिकधर्म': { field: 'maternalHealth.lmpDate', type: 'string' },
-
-    'ईडीडी': { field: 'maternalHealth.edd', type: 'string' },
-    'डिलीवरी': { field: 'maternalHealth.edd', type: 'string' },
-    'जन्मकीतारीख': { field: 'maternalHealth.edd', type: 'string' },
-    'प्रसवकीतारीख': { field: 'maternalHealth.edd', type: 'string' },
-
-    'एएनसी': { field: 'maternalHealth.ancVisits', type: 'number' },
-    'चेकअप': { field: 'maternalHealth.ancVisits', type: 'number' },
-    'जांच': { field: 'maternalHealth.ancVisits', type: 'number' },
-    'विजिट': { field: 'maternalHealth.ancVisits', type: 'number' },
-    'मुलाकात': { field: 'maternalHealth.ancVisits', type: 'number' },
-
-    // High Risk Factors
-    'उच्चजोखिम': { field: 'maternalHealth.highRiskFactors', type: 'flag', value: 'उच्च जोखिम' },
-    'खतरा': { field: 'maternalHealth.highRiskFactors', type: 'flag', value: 'जोखिम कारक' },
-    'उच्चरक्तचाप': { field: 'maternalHealth.highRiskFactors', type: 'flag', value: 'उच्च रक्तचाप' },
-    'डायबिटीज': { field: 'maternalHealth.highRiskFactors', type: 'flag', value: 'मधुमेह' },
-    'मधुमेह': { field: 'maternalHealth.highRiskFactors', type: 'flag', value: 'मधुमेह' },
-    'एनीमिया': { field: 'maternalHealth.highRiskFactors', type: 'flag', value: 'एनीमिया' },
-    'खून': { field: 'maternalHealth.highRiskFactors', type: 'flag', value: 'रक्त संबंधी समस्या' },
-
-    // ===== CHILD HEALTH =====
-    'बच्चा': { field: 'childHealth.childName', type: 'string' },
-    'शिशु': { field: 'childHealth.childName', type: 'string' },
-    'बच्ची': { field: 'childHealth.childName', type: 'string' },
-    'बेटा': { field: 'childHealth.childName', type: 'string' },
-    'बेटी': { field: 'childHealth.childName', type: 'string' },
-    'लड़का': { field: 'childHealth.childName', type: 'string' },
-    'लड़की': { field: 'childHealth.childName', type: 'string' },
-
-    'वजन': { field: 'childHealth.weight', type: 'string' },
-    'भार': { field: 'childHealth.weight', type: 'string' },
-    'वेट': { field: 'childHealth.weight', type: 'string' },
-    'किलो': { field: 'childHealth.weight', type: 'string', isSuffix: true },
-    'ग्राम': { field: 'childHealth.weight', type: 'string', isSuffix: true },
-
-    'कुपोषण': { field: 'childHealth.isMalnourished', type: 'boolean', value: 'हां' },
-    'कुपोषित': { field: 'childHealth.isMalnourished', type: 'boolean', value: 'हां' },
-    'पतला': { field: 'childHealth.isMalnourished', type: 'boolean', value: 'हां' },
-    'कमजोर': { field: 'childHealth.isMalnourished', type: 'boolean', value: 'हां' },
-    'दुबला': { field: 'childHealth.isMalnourished', type: 'boolean', value: 'हां' },
-
-    // Child Illness Symptoms
-    'बच्चेकीबीमारी': { field: 'childHealth.illnessSymptoms', type: 'flag', value: 'सामान्य बीमारी' },
-    'डायरिया': { field: 'childHealth.illnessSymptoms', type: 'flag', value: 'डायरिया' },
-    'सांस की तकलीफ': { field: 'childHealth.illnessSymptoms', type: 'flag', value: 'सांस की तकलीफ' },
-    'निमोनिया': { field: 'childHealth.illnessSymptoms', type: 'flag', value: 'निमोनिया' },
-
-    // ===== IMMUNIZATION =====
-    'टीका': { field: 'immunization.lastVaccine', type: 'string' },
-    'टीकाकरण': { field: 'immunization.lastVaccine', type: 'string' },
-    'वैक्सीन': { field: 'immunization.lastVaccine', type: 'string' },
-    'इंजेक्शन': { field: 'immunization.lastVaccine', type: 'string' },
-    'बीसीजी': { field: 'immunization.lastVaccine', type: 'boolean', value: 'BCG' },
-    'डीपीटी': { field: 'immunization.lastVaccine', type: 'boolean', value: 'DPT' },
-    'पोलियो': { field: 'immunization.lastVaccine', type: 'boolean', value: 'पोलियो' },
-    'खसरा': { field: 'immunization.lastVaccine', type: 'boolean', value: 'खसरा' },
-    'एमएमआर': { field: 'immunization.lastVaccine', type: 'boolean', value: 'MMR' },
-
-    'अगलाटीका': { field: 'immunization.nextVaccineDate', type: 'string' },
-    'नेक्स्टवैक्सीन': { field: 'immunization.nextVaccineDate', type: 'string' },
-    'आनेवालाटीका': { field: 'immunization.nextVaccineDate', type: 'string' },
-
-    // ===== GENERAL HEALTH =====
-    'परिवार': { field: 'generalHealth.familyMembers', type: 'number' },
-    'परिवारकेसदस्य': { field: 'generalHealth.familyMembers', type: 'number' },
-    'घरमेंकितने': { field: 'generalHealth.familyMembers', type: 'number' },
-    'कुलसदस्य': { field: 'generalHealth.familyMembers', type: 'number' },
-
-    // Chronic Illness
-    'पुरानीबीमारी': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'पुरानी बीमारी' },
-    'लंबीबीमारी': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'लंबी बीमारी' },
-    'शुगर': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'मधुमेह' },
-    'हाईबीपी': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'उच्च रक्तचाप' },
-    'दिल': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'हृदय रोग' },
-    'हार्ट': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'हृदय रोग' },
-    'किडनी': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'किडनी रोग' },
-    'लिवर': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'लिवर रोग' },
-    'जिगर': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'लिवर रोग' },
-    'अस्थमा': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'अस्थमा' },
-    'दमा': { field: 'generalHealth.chronicIllness', type: 'flag', value: 'अस्थमा' },
-
-    // Current Symptoms - Comprehensive
-    'बुखार': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'बुखार' },
-    'तेज़बुखार': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'तेज़ बुखार' },
-    'खांसी': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'खांसी' },
-    'सूखीखांसी': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'सूखी खांसी' },
-    'कफ': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'कफ' },
-    'कमजोरी': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'कमजोरी' },
-    'थकान': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'थकान' },
-    'दर्द': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'दर्द' },
-    'सिरदर्द': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'सिरदर्द' },
-    'पेट दर्द': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'पेट दर्द' },
-    'छातीदर्द': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'छाती दर्द' },
-    'जोड़ोंदर्द': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'जोड़ों का दर्द' },
-    'चक्कर': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'चक्कर आना' },
-    'जीमिचलाना': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'जी मिचलाना' },
-    'उल्टी': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'उल्टी' },
-    'दस्त': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'दस्त' },
-    'कब्ज': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'कब्ज' },
-    'खुजली': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'खुजली' },
-    'रैश': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'रैश' },
-    'सूजन': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'सूजन' },
-    'घबराहट': { field: 'generalHealth.currentSymptoms', type: 'flag', value: 'घबराहट' },
-
-    // ===== TREATMENT =====
-    'दवाई': { field: 'treatment.medicineProvided', type: 'array' },
+    'फोन': { field: 'basicInfo.mobile', type: 'string' },
+    'मोबाइल': { field: 'basicInfo.mobile', type: 'string' },
+    'नंबर': { field: 'basicInfo.mobile', type: 'string' },
+    'फोन नंबर': { field: 'basicInfo.mobile', type: 'string' },
+    'मोबाइल नंबर': { field: 'basicInfo.mobile', type: 'string' },
+    'कॉन्टैक्ट': { field: 'basicInfo.mobile', type: 'string' },
+    'कॉन्टैक्ट नंबर': { field: 'basicInfo.mobile', type: 'string' },
+    'संपर्क': { field: 'basicInfo.mobile', type: 'string' },
+    'संपर्क नंबर': { field: 'basicInfo.mobile', type: 'string' },
+    'दिनांक': { field: 'basicInfo.visitDate', type: 'string' },
+    'तारीख': { field: 'basicInfo.visitDate', type: 'string' },
     'दवा': { field: 'treatment.medicineProvided', type: 'array' },
+    'दवाई': { field: 'treatment.medicineProvided', type: 'array' },
     'गोली': { field: 'treatment.medicineProvided', type: 'array' },
-    'टैबलेट': { field: 'treatment.medicineProvided', type: 'array' },
-    'सिरप': { field: 'treatment.medicineProvided', type: 'array' },
-    'मेडिसिन': { field: 'treatment.medicineProvided', type: 'array' },
-    'इलाज': { field: 'treatment.medicineProvided', type: 'array' },
     'पैरासिटामोल': { field: 'treatment.medicineProvided', type: 'flag', value: 'पैरासिटामोल' },
-    'एस्प्रिन': { field: 'treatment.medicineProvided', type: 'flag', value: 'एस्प्रिन' },
-    'एंटीबायोटिक': { field: 'treatment.medicineProvided', type: 'flag', value: 'एंटीबायोटिक' },
     'आयरन': { field: 'treatment.medicineProvided', type: 'flag', value: 'आयरन टैबलेट' },
     'कैल्शियम': { field: 'treatment.medicineProvided', type: 'flag', value: 'कैल्शियम' },
     'विटामिन': { field: 'treatment.medicineProvided', type: 'flag', value: 'विटामिन' },
     'ओआरएस': { field: 'treatment.medicineProvided', type: 'flag', value: 'ORS' },
-
     'रेफर': { field: 'treatment.isReferred', type: 'boolean', value: 'हां' },
-    'भेजा': { field: 'treatment.isReferred', type: 'boolean', value: 'हां' },
     'अस्पताल': { field: 'treatment.isReferred', type: 'boolean', value: 'हां' },
-    'डॉक्टर': { field: 'treatment.isReferred', type: 'boolean', value: 'हां' },
-    'स्पेशलिस्ट': { field: 'treatment.isReferred', type: 'boolean', value: 'हां' },
-
-    'रेफरलप्लेस': { field: 'treatment.referralPlace', type: 'string' },
-    'कहांभेजा': { field: 'treatment.referralPlace', type: 'string' },
-    'कौनसाअस्पताल': { field: 'treatment.referralPlace', type: 'string' },
-    'प्राइमरी': { field: 'treatment.referralPlace', type: 'boolean', value: 'प्राइमरी हेल्थ सेंटर' },
-    'सीएचसी': { field: 'treatment.referralPlace', type: 'boolean', value: 'कम्युनिटी हेल्थ सेंटर' },
-    'जिलाअस्पताल': { field: 'treatment.referralPlace', type: 'boolean', value: 'जिला अस्पताल' },
-
     'फॉलोअप': { field: 'treatment.nextFollowUp', type: 'string' },
-    'अगलीमुलाकात': { field: 'treatment.nextFollowUp', type: 'string' },
-    'दोबारा': { field: 'treatment.nextFollowUp', type: 'string' },
-    'फिरआना': { field: 'treatment.nextFollowUp', type: 'string' },
-    'नेक्स्ट': { field: 'treatment.nextFollowUp', type: 'string' },
+    'अगली मुलाकात': { field: 'treatment.nextFollowUp', type: 'string' },
+    'अगली बार': { field: 'treatment.nextFollowUp', type: 'string' },
+    'फिर आना': { field: 'treatment.nextFollowUp', type: 'string' },
+    'दोबारा आना': { field: 'treatment.nextFollowUp', type: 'string' },
+    'अगली तारीख': { field: 'treatment.nextFollowUp', type: 'string' },
+    'अगले सप्ताह': { field: 'treatment.nextFollowUp', type: 'string' },
+    'अगले महीने': { field: 'treatment.nextFollowUp', type: 'string' },
 
-    // ===== FAMILY PLANNING =====
-    'परिवारनियोजन': { field: 'familyPlanning.contraceptionMethod', type: 'string' },
-    'फैमिलीप्लानिंग': { field: 'familyPlanning.contraceptionMethod', type: 'string' },
-    'गर्भनिरोध': { field: 'familyPlanning.contraceptionMethod', type: 'string' },
-    'कॉन्ट्रासेप्शन': { field: 'familyPlanning.contraceptionMethod', type: 'string' },
-    'कंडोम': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'कंडोम' },
-    'गर्भनिरोधकगोली': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'गर्भनिरोधक गोली' },
-    'गर्भनिरोधकइंजेक्शन': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'इंजेक्शन' },
-    'आईयूडी': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'IUD' },
-    'कॉपरटी': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'कॉपर-टी' },
-    'नसबंदी': { field: 'familyPlanning.contraceptionMethod', type: 'boolean', value: 'नसबंदी' },
-    };
+
+    // ========================================================================
+    // ===== CONTEXT-AWARE KEYWORDS (Meaning changes based on patient type) =====
+    // ========================================================================
+
+    // --- Generic Visit Keywords ---
+    'चेकअप': {
+        field: {
+            maternal: 'maternalHealth.ancVisits',
+            child: 'childHealth.checkUpCount',
+            general: 'generalHealth.visitCount'
+        },
+        type: 'number'
+    },
+    'जांच': {
+        field: {
+            maternal: 'maternalHealth.ancVisits',
+            child: 'childHealth.checkUpCount',
+            general: 'generalHealth.visitCount'
+        },
+        type: 'number'
+    },
+    'विजिट': {
+        field: {
+            maternal: 'maternalHealth.ancVisits',
+            child: 'childHealth.checkUpCount',
+            general: 'generalHealth.visitCount'
+        },
+        type: 'number'
+    },
+    'मुलाकात': {
+        field: {
+            maternal: 'maternalHealth.ancVisits',
+            child: 'childHealth.checkUpCount',
+            general: 'generalHealth.visitCount'
+        },
+        type: 'number'
+    },
+    'एएनसी': {
+        field: {
+            maternal: 'maternalHealth.ancVisits',
+            child: 'childHealth.checkUpCount',
+            general: 'generalHealth.visitCount'
+        },
+        type: 'number'
+    },
+
+    // --- Generic Measurement Keywords ---
+    'वजन': {
+        field: {
+            maternal: 'maternalHealth.weight',
+            child: 'childHealth.weight',
+            general: 'generalHealth.weight'
+        },
+        type: 'string'
+    },
+    'किलो': {
+        field: {
+            maternal: 'maternalHealth.weight',
+            child: 'childHealth.weight',
+            general: 'generalHealth.weight'
+        },
+        type: 'string',
+        isSuffix: true
+    },
+    'किलोग्राम': {
+        field: {
+            maternal: 'maternalHealth.weight',
+            child: 'childHealth.weight',
+            general: 'generalHealth.weight'
+        },
+        type: 'string',
+        isSuffix: true
+    },
+    
+    // --- Generic Symptom Keywords ---
+    'बुखार': {
+        field: {
+            maternal: 'maternalHealth.symptoms',
+            child: 'childHealth.illnessSymptoms',
+            general: 'generalHealth.currentSymptoms'
+        },
+        type: 'flag',
+        value: 'बुखार'
+    },
+    'खांसी': {
+        field: {
+            maternal: 'maternalHealth.symptoms',
+            child: 'childHealth.illnessSymptoms',
+            general: 'generalHealth.currentSymptoms'
+        },
+        type: 'flag',
+        value: 'खांसी'
+    },
+    'कमजोरी': {
+        field: {
+            maternal: 'maternalHealth.symptoms',
+            child: 'childHealth.illnessSymptoms',
+            general: 'generalHealth.currentSymptoms'
+        },
+        type: 'flag',
+        value: 'कमजोरी'
+    },
+    'दर्द': {
+        field: {
+            maternal: 'maternalHealth.symptoms',
+            child: 'childHealth.illnessSymptoms',
+            general: 'generalHealth.currentSymptoms'
+        },
+        type: 'flag',
+        value: 'दर्द'
+    },
+    'उल्टी': {
+        field: {
+            maternal: 'maternalHealth.symptoms',
+            child: 'childHealth.illnessSymptoms',
+            general: 'generalHealth.currentSymptoms'
+        },
+        type: 'flag',
+        value: 'उल्टी'
+    },
+    'सिरदर्द': {
+        field: {
+            maternal: 'maternalHealth.symptoms',
+            child: 'childHealth.illnessSymptoms',
+            general: 'generalHealth.currentSymptoms'
+        },
+        type: 'flag',
+        value: 'सिरदर्द'
+    },
+    'पेटदर्द': {
+        field: {
+            maternal: 'maternalHealth.symptoms',
+            child: 'childHealth.illnessSymptoms',
+            general: 'generalHealth.currentSymptoms'
+        },
+        type: 'flag',
+        value: 'पेटदर्द'
+    },
+
+
+    // ========================================================================
+    // ===== CONTEXT-SPECIFIC KEYWORDS (Only apply in one context) =====
+    // ========================================================================
+
+    // --- Maternal Health Specific ---
+    'गर्भवती': { field: { maternal: 'maternalHealth.isPregnant' }, type: 'boolean', value: 'हां' },
+    'प्रेगनेंट': { field: { maternal: 'maternalHealth.isPregnant' }, type: 'boolean', value: 'हां' },
+    'गर्भावस्था': { field: { maternal: 'maternalHealth.isPregnant' }, type: 'boolean', value: 'हां' },
+    'लंप': { field: { maternal: 'maternalHealth.lmpDate' }, type: 'string' },
+    'अंतिम माहवारी': { field: { maternal: 'maternalHealth.lmpDate' }, type: 'string' },
+    'ऐड': { field: { maternal: 'maternalHealth.edd' }, type: 'string' },
+    'डिलीवरी': { field: { maternal: 'maternalHealth.edd' }, type: 'string' },
+    'प्रसव': { field: { maternal: 'maternalHealth.edd' }, type: 'string' },
+    'उच्च रक्तचाप': { field: { maternal: 'maternalHealth.highRiskFactors', general: 'generalHealth.chronicIllness' }, type: 'flag', value: 'उच्च रक्तचाप' },
+    'मधुमेह': { field: { maternal: 'maternalHealth.highRiskFactors', general: 'generalHealth.chronicIllness' }, type: 'flag', value: 'मधुमेह' },
+    'एनीमिया': { field: { maternal: 'maternalHealth.highRiskFactors' }, type: 'flag', value: 'एनीमिया' },
+    'खून की कमी': { field: { maternal: 'maternalHealth.highRiskFactors' }, type: 'flag', value: 'एनीमिया' },
+
+    // --- Child Health Specific ---
+    'बच्चा': { field: { child: 'childHealth.childName' }, type: 'string' },
+    'शिशु': { field: { child: 'childHealth.childName' }, type: 'string' },
+    'बेबी': { field: { child: 'childHealth.childName' }, type: 'string' },
+    'कुपोषण': { field: { child: 'childHealth.isMalnourished' }, type: 'boolean', value: 'हां' },
+    'कुपोषित': { field: { child: 'childHealth.isMalnourished' }, type: 'boolean', value: 'हां' },
+    'डायरिया': { field: { child: 'childHealth.illnessSymptoms' }, type: 'flag', value: 'डायरिया' },
+    'निमोनिया': { field: { child: 'childHealth.illnessSymptoms' }, type: 'flag', value: 'निमोनिया' },
+    'सांस की तकलीफ': { field: { child: 'childHealth.illnessSymptoms' }, type: 'flag', value: 'सांस की तकलीफ' },
+
+    // --- Immunization (Child Specific) ---
+    'टीका': { field: { child: 'immunization.lastVaccine' }, type: 'string' },
+    'टीका दिया': { field: { child: 'immunization.lastVaccine' }, type: 'string' },
+    'टिका': { field: { child: 'immunization.lastVaccine' }, type: 'string' },
+    'टिका दिया': { field: { child: 'immunization.lastVaccine' }, type: 'string' },
+    'टीकाकरण': { field: { child: 'immunization.lastVaccine' }, type: 'string' },
+    'वैक्सीन': { field: { child: 'immunization.lastVaccine' }, type: 'string' },
+    'बीसीजी': { field: { child: 'immunization.vaccinesGiven' }, type: 'flag', value: 'BCG' },
+    'डीपीटी': { field: { child: 'immunization.vaccinesGiven' }, type: 'flag', value: 'DPT' },
+    'पोलियो': { field: { child: 'immunization.vaccinesGiven' }, type: 'flag', value: 'पोलियो' },
+    'खसरा': { field: { child: 'immunization.vaccinesGiven' }, type: 'flag', value: 'खसरा' },
+    'अगला टीका': { field: { child: 'immunization.nextVaccineDate' }, type: 'string' },
+    'अगली वैक्सीन': { field: { child: 'immunization.nextVaccineDate' }, type: 'string' },
+
+    // --- Family Planning (Maternal/General Specific) ---
+    'परिवार नियोजन': { field: { maternal: 'familyPlanning.contraceptionMethod', general: 'familyPlanning.contraceptionMethod' }, type: 'string' },
+    'कंडोम': { field: { maternal: 'familyPlanning.contraceptionMethod', general: 'familyPlanning.contraceptionMethod' }, type: 'boolean', value: 'कंडोम' },
+    'कॉपर-टी': { field: { maternal: 'familyPlanning.contraceptionMethod', general: 'familyPlanning.contraceptionMethod' }, type: 'boolean', value: 'कॉपर-टी' },
+    'नसबंदी': { field: { maternal: 'familyPlanning.contraceptionMethod', general: 'familyPlanning.contraceptionMethod' }, type: 'boolean', value: 'नसबंदी' },
+    'गर्भनिरोधक': { field: { maternal: 'familyPlanning.contraceptionMethod', general: 'familyPlanning.contraceptionMethod' }, type: 'string' },
+};
 
 export default keywords;

@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import './App.css';
+
+// --- UPDATED IMPORTS (REMOVED .jsx/.js extensions) ---
+// Some build tools prefer imports without file extensions.
 import parseHindiText from './parseHindiText';
 import Navbar from './Navbar';
 import VisitsLog from './VisitsLog';
@@ -8,7 +11,7 @@ import HomePage from './homepage';
 import AuthPage from './AuthPage';
 import { auth, db } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { collection, addDoc, serverTimestamp, query, onSnapshot } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, query, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import VisitDetailModal from './VisitDetailModal';
 
 function App() {
@@ -22,18 +25,11 @@ function App() {
   const [recordingStatus, setRecordingStatus] = useState('idle');
   const [parsedData, setParsedData] = useState(null);
   const [editingField, setEditingField] = useState(null);
-  
-  // 🚨 NEW SCHEME STATES 🚨
-  const [schemeQuery, setSchemeQuery] = useState(''); 
-  const [schemeResult, setSchemeResult] = useState(null); 
-  // -----------------------
-
-  // Visit Log State (Placeholder for future Local Storage implementation)
-  const [savedVisits, setSavedVisits] = useState([]); 
-
+  const [selectedVisitType, setSelectedVisitType] = useState('General');
   const recognitionRef = useRef(null);
   const accumulatedTranscriptRef = useRef('');
   const transcriptBoxRef = useRef(null);
+  const lastProcessedIndexRef = useRef(0);
   const [selectedVisit, setSelectedVisit] = useState(null);
 
   // --- NEW COMBINED useEffect FOR AUTH AND DATA FETCHING ---
@@ -110,7 +106,10 @@ function App() {
   };
 
   const handleStartOrResume = () => {
+    // Always preserve the current transcribed text
     accumulatedTranscriptRef.current = transcribedText;
+    // Reset the processed index for new session
+    lastProcessedIndexRef.current = 0;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert("Your browser doesn't support Speech Recognition. Please use Chrome.");
@@ -121,14 +120,65 @@ function App() {
     recognition.lang = 'hi-IN';
     recognition.interimResults = true;
     recognition.continuous = true;
+    
     recognition.onresult = (event) => {
       let interimTranscript = '';
+      let newFinalText = '';
+      
       for (let i = event.resultIndex; i < event.results.length; ++i) {
-        interimTranscript += event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          // Only process results we haven't seen before
+          if (i >= lastProcessedIndexRef.current) {
+            newFinalText += event.results[i][0].transcript;
+            lastProcessedIndexRef.current = i + 1;
+          }
+        } else {
+          // Interim result - show as temporary
+          interimTranscript += event.results[i][0].transcript;
+        }
       }
+      
+      // Add new final text to accumulated text
+      if (newFinalText) {
+        accumulatedTranscriptRef.current += newFinalText;
+      }
+      
       setTranscribedText(accumulatedTranscriptRef.current + interimTranscript);
     };
-    recognition.onerror = (event) => console.error('Speech recognition error:', event.error);
+    
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      // On error, preserve accumulated text and try to restart
+      if (event.error === 'no-speech' || event.error === 'audio-capture') {
+        // These errors are common and we should try to restart
+        setTimeout(() => {
+          if (recordingStatus === 'recording') {
+            try {
+              recognition.start();
+            } catch (e) {
+              console.log('Recognition restart failed:', e);
+            }
+          }
+        }, 1000);
+      }
+    };
+    
+    recognition.onend = () => {
+      // When recognition ends naturally, preserve the accumulated text
+      if (recordingStatus === 'recording') {
+        // Try to restart recognition automatically
+        setTimeout(() => {
+          if (recordingStatus === 'recording') {
+            try {
+              recognition.start();
+            } catch (e) {
+              console.log('Auto-restart failed:', e);
+            }
+          }
+        }, 100);
+      }
+    };
+    
     recognition.start();
     setRecordingStatus('recording');
   };
@@ -138,22 +188,26 @@ function App() {
       recognitionRef.current.stop();
       setRecordingStatus('paused');
     }
+    // Don't modify accumulated text on pause - it's already preserved
   };
 
   const handleStop = () => {
-    const finalTranscript = transcribedText;
+    // Ensure we have the most up-to-date accumulated text
+    const finalTranscript = accumulatedTranscriptRef.current || transcribedText;
     if (recordingStatus === 'recording' && recognitionRef.current) {
       recognitionRef.current.stop();
     }
-    const data = parseHindiText(finalTranscript);
+    const data = parseHindiText(finalTranscript, selectedVisitType);
     setParsedData(data);
     setRecordingStatus('idle');
-    accumulatedTranscriptRef.current = '';
+    // Don't clear accumulated text here - let it persist for potential retry
   };
 
   const handleRetry = () => {
     setParsedData(null);
     setTranscribedText('');
+    accumulatedTranscriptRef.current = '';
+    lastProcessedIndexRef.current = 0;
   };
 
   const handleEdit = (fieldName) => {
@@ -181,8 +235,11 @@ function App() {
     setEditingField(null);
   };
 
+  const handleVisitTypeChange = (event) => {
+    setSelectedVisitType(event.target.value);
+  };
+
   const handleNavigate = (page) => {
-    if (recognitionRef.current) recognitionRef.current.stop();
     setActivePage(page);
   };
 
@@ -191,10 +248,35 @@ function App() {
   setSelectedVisit(visit);
   };  
 
-  // This function will close the modal
   const handleCloseModal = () => {
     setSelectedVisit(null);
   };
+
+  const handleDeleteVisit = async (visitIdToDelete) => {
+    // Use a simple confirmation dialog before deleting
+    if (!window.confirm("Are you sure you want to delete this visit record? This action cannot be undone.")) {
+      return; // If the user clicks "Cancel", stop the function
+    }
+
+    try {
+      // Create a reference to the specific document to be deleted
+      // The path must match exactly: users/{userId}/visits/{visitId}
+      const visitDocRef = doc(db, 'users', currentUser.uid, 'visits', visitIdToDelete);
+
+      // Delete the document from Firestore
+      await deleteDoc(visitDocRef);
+
+      // Update the local state to remove the visit from the UI instantly
+      setVisits(currentVisits => currentVisits.filter(visit => visit.id !== visitIdToDelete));
+      
+      console.log("Visit deleted successfully!");
+
+    } catch (error) {
+      console.error("Error deleting visit: ", error);
+      alert("There was an error deleting the visit. Please try again.");
+    }
+  };  
+
 
   if (isLoading) {
     return (
@@ -224,6 +306,7 @@ function App() {
               transcribedText={transcribedText}
               editingField={editingField}
               transcriptBoxRef={transcriptBoxRef}
+              selectedVisitType={selectedVisitType}
               handleStartOrResume={handleStartOrResume}
               handlePause={handlePause}
               handleStop={handleStop}
@@ -232,22 +315,11 @@ function App() {
               handleEdit={handleEdit}
               handleSaveEdit={handleSaveEdit}
               handleCancelEdit={handleCancelEdit}
+              handleVisitTypeChange={handleVisitTypeChange}
             />
           )}
-          {activePage === 'visits' && <VisitsLog visits={visits} onViewDetails={handleViewDetails} />}
-          {/* 🚨 SCHEMES COMPONENT: Passing all necessary states/refs 🚨 */}
-          {activePage === 'schemes' && (
-            <Schemes 
-              schemeQuery={schemeQuery}
-              setSchemeQuery={setSchemeQuery}
-              schemeResult={schemeResult}
-              setSchemeResult={setSchemeResult}
-              recognitionRef={recognitionRef}
-              accumulatedTranscriptRef={accumulatedTranscriptRef}
-              recordingStatus={recordingStatus} // Passed down to be read/set as 'listening_scheme'
-              setRecordingStatus={setRecordingStatus}
-            />
-          )}
+          {activePage === 'visits' && <VisitsLog visits={visits} onViewDetails={handleViewDetails} onDelete={handleDeleteVisit} user={currentUser}/>}
+          {activePage === 'schemes' && <Schemes />}
         </main>
       </div>
       <Navbar activePage={activePage} onNavigate={handleNavigate} />

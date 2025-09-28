@@ -4,19 +4,39 @@ import React, { useState, useEffect } from 'react';
 import { db } from './firebase'; 
 import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 
-// Placeholder data to simulate what we'll get from Firestore
-const placeholderFollowUps = [
-  { id: 1, patientName: 'Priya Sharma', followUpDate: 'Tomorrow' },
-  { id: 2, patientName: 'Geeta Singh', followUpDate: 'In 3 days' },
-  { id: 3, patientName: 'Meena Kumari', followUpDate: 'In 5 days' },
-];
 
-const formatFollowUpDate = (dateString) => {
-  // Firestore will give us a date string like "YYYY-MM-DD"
-  const followUpDate = new Date(dateString);
+// src/FollowUps.jsx
+
+const formatFollowUpDate = (dateInput) => {
+  let followUpDate;
+
+  // NEW: Handle both Firebase Timestamp objects and date strings
+  if (typeof dateInput === 'object' && dateInput !== null && typeof dateInput.toDate === 'function') {
+    // If it's a Timestamp, convert it directly to a JavaScript Date object
+    followUpDate = dateInput.toDate();
+  } else if (typeof dateInput === 'string') {
+    // If it's a string, parse it. This handles "DD-MM-YYYY" and "YYYY-MM-DD".
+    const parts = dateInput.split('-');
+    if (parts.length === 3) {
+      // Check if the format is DD-MM-YYYY by looking at the length of the last part
+      if (parts[2].length === 4) {
+        // Rearrange DD-MM-YYYY to YYYY-MM-DD for reliable parsing
+        followUpDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+      } else {
+        // Assume it's already YYYY-MM-DD
+        followUpDate = new Date(dateInput);
+      }
+    }
+  }
+
+  // If we couldn't create a valid date, return 'Invalid Date'
+  if (!followUpDate || isNaN(followUpDate.getTime())) {
+    return 'Invalid Date';
+  }
+
   const today = new Date();
   
-  // Normalize dates to the beginning of the day for accurate comparison
+  // The rest of the logic remains the same
   followUpDate.setHours(0, 0, 0, 0);
   today.setHours(0, 0, 0, 0);
 
@@ -27,12 +47,10 @@ const formatFollowUpDate = (dateString) => {
   if (diffDays === 1) return 'Tomorrow';
   if (diffDays > 1 && diffDays <= 7) return `In ${diffDays} days`;
   
-  // Fallback for dates further than a week away
-  return new Date(dateString).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  });
+  const day = String(followUpDate.getDate()).padStart(2, '0');
+  const month = String(followUpDate.getMonth() + 1).padStart(2, '0');
+  const year = followUpDate.getFullYear();
+  return `${day}-${month}-${year}`;
 };
 
 
@@ -60,8 +78,8 @@ const FollowUps = ({ userId }) => {
         // 2. Create the query
         const q = query(
           visitsRef,
-          where('followUp.date', '>=', today), // Find visits where the follow-up date is today or later
-          orderBy('followUp.date'),            // Sort them by the soonest date first
+          where('treatment.nextFollowUp', '>=', today), // Find visits where the follow-up date is today or later
+          orderBy('treatment.nextFollowUp'),            // Sort them by the soonest date first
           limit(5)                             // Limit to a maximum of 5 results
         );
 
@@ -71,9 +89,31 @@ const FollowUps = ({ userId }) => {
         // 4. Process the results
         const followUpsData = querySnapshot.docs.map(doc => ({
           id: doc.id,
-          patientName: doc.data().patient?.name || 'Unknown Patient', // Safely access patient name
-          followUpDate: doc.data().followUp.date
+          patientName: doc.data().basicInfo?.patientName || 'Unknown Patient', // Safely access patient name
+          followUpDate: doc.data().treatment.nextFollowUp
         }));
+
+         followUpsData.sort((a, b) => {
+        // A small helper to convert any of our date formats into a true Date object
+        const toDate = (dateInput) => {
+          if (typeof dateInput === 'object' && dateInput !== null && typeof dateInput.toDate === 'function') {
+            return dateInput.toDate(); // Handles Firebase Timestamps
+          }
+          if (typeof dateInput === 'string') {
+            const parts = dateInput.split('-');
+            if (parts.length === 3 && parts[2].length === 4) {
+              return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`); // Handles DD-MM-YYYY
+            }
+            return new Date(dateInput); // Handles YYYY-MM-DD
+          }
+          return new Date('9999-12-31'); // Fallback for invalid data to sort it last
+        };
+        
+        const dateA = toDate(a.followUpDate);
+        const dateB = toDate(b.followUpDate);
+
+        return dateA - dateB; // Subtracting dates sorts them chronologically (earliest first)
+      });
 
         setFollowUps(followUpsData);
 
@@ -97,7 +137,7 @@ const FollowUps = ({ userId }) => {
 
   return (
     <div className="follow-ups-container">
-      <h3>🗓️ Upcoming Follow-ups</h3>
+      <h3>Upcoming Follow-ups</h3>
       {followUps.length > 0 ? (
         <ul className="follow-ups-list">
           {/* We now map over the 'followUps' state which contains live data */}

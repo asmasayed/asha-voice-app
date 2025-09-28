@@ -31,6 +31,7 @@ const HomePage = ({
   transcribedText,
   editingField,
   transcriptBoxRef,
+  selectedVisitType,
   handleStartOrResume,
   handlePause,
   handleStop,
@@ -38,7 +39,8 @@ const HomePage = ({
   handleRetry,
   handleEdit,
   handleSaveEdit,
-  handleCancelEdit
+  handleCancelEdit,
+  handleVisitTypeChange
 }) => {
   return (
     <>
@@ -73,6 +75,10 @@ const HomePage = ({
                 <h3>Maternal Health</h3>
                 <DetailRow label="Pregnant?" value={parsedData.maternalHealth.isPregnant} fieldPath="maternalHealth.isPregnant" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
                 <DetailRow label="ANC Visits" value={parsedData.maternalHealth.ancVisits} fieldPath="maternalHealth.ancVisits" inputType="number" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                <DetailRow label="LMP Date" value={parsedData.maternalHealth.lmpDate} fieldPath="maternalHealth.lmpDate" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                <DetailRow label="EDD" value={parsedData.maternalHealth.edd} fieldPath="maternalHealth.edd" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                <DetailRow label="Weight" value={parsedData.maternalHealth.weight} fieldPath="maternalHealth.weight" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                <p><strong>High Risk Factors:</strong> {parsedData.maternalHealth.highRiskFactors?.join(', ') || 'None'}</p>
                 </div>
             )}
 
@@ -80,17 +86,33 @@ const HomePage = ({
             {parsedData.visitType === 'Child' && (
                 <div className="confirmation-section">
                 <h3>Child Health</h3>
+                <DetailRow label="Child Name" value={parsedData.childHealth.childName} fieldPath="childHealth.childName" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
                 <DetailRow label="Weight" value={parsedData.childHealth.weight} fieldPath="childHealth.weight" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                <DetailRow label="Malnourished?" value={parsedData.childHealth.isMalnourished} fieldPath="childHealth.isMalnourished" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                <p><strong>Illness Symptoms:</strong> {parsedData.childHealth.illnessSymptoms?.join(', ') || 'None'}</p>
+                <DetailRow label="Last Vaccine" value={parsedData.immunization.lastVaccine} fieldPath="immunization.lastVaccine" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                <DetailRow label="Next Vaccine Date" value={parsedData.immunization.nextVaccineDate} fieldPath="immunization.nextVaccineDate" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
                 </div>
             )}
 
             {/* --- SECTION 3: GENERAL HEALTH & TREATMENT --- */}
             <div className="confirmation-section">
                 <h3>General Health & Treatment</h3>
-                <p><strong>Symptoms:</strong> {parsedData.generalHealth.currentSymptoms.join(', ') || 'None'}</p>
-                <p><strong>Medicine Provided:</strong> {parsedData.treatment.medicineProvided.join(', ') || 'None'}</p>
-                <p><strong>Referred:</strong> {parsedData.treatment.isReferred || 'No'}</p>
+                <p><strong>Symptoms:</strong> {parsedData.generalHealth.currentSymptoms?.join(', ') || 'None'}</p>
+                <p><strong>Chronic Illness:</strong> {parsedData.generalHealth.chronicIllness?.join(', ') || 'None'}</p>
+                <DetailRow label="Family Members" value={parsedData.generalHealth.familyMembers} fieldPath="generalHealth.familyMembers" inputType="number" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                <p><strong>Medicine Provided:</strong> {parsedData.treatment.medicineProvided?.join(', ') || 'None'}</p>
+                <DetailRow label="Referred" value={parsedData.treatment.isReferred} fieldPath="treatment.isReferred" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                <DetailRow label="Next Follow-up" value={parsedData.treatment.nextFollowUp} fieldPath="treatment.nextFollowUp" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
             </div>
+
+            {/* --- SECTION 4: FAMILY PLANNING (Conditional) --- */}
+            {(parsedData.visitType === 'Maternal' || parsedData.visitType === 'General') && (
+                <div className="confirmation-section">
+                <h3>Family Planning</h3>
+                <DetailRow label="Contraception Method" value={parsedData.familyPlanning.contraceptionMethod} fieldPath="familyPlanning.contraceptionMethod" {...{ editingField, onEdit: handleEdit, onSave: handleSaveEdit, onCancel: handleCancelEdit }} />
+                </div>
+            )}
 
             {/* --- FINAL ACTION BUTTONS --- */}
             <div className="button-group-confirm">
@@ -100,6 +122,21 @@ const HomePage = ({
         </div>
       ) : (
         <div className="card recording-view">
+            {/* Visit Type Selector */}
+            <div className="visit-type-selector">
+                <label htmlFor="visitType">Visit Type:</label>
+                <select 
+                    id="visitType" 
+                    value={selectedVisitType} 
+                    onChange={handleVisitTypeChange}
+                    className="visit-type-dropdown"
+                >
+                    <option value="General">General</option>
+                    <option value="Maternal">Maternal</option>
+                    <option value="Child">Child</option>
+                </select>
+            </div>
+            
             <div className="button-group">
                 {recordingStatus === 'idle' && (
                 <div className="mic-wrapper">
@@ -114,6 +151,7 @@ const HomePage = ({
                     <div className="mic-button is-recording">
                     <img src="/mic.png" alt="Recording icon" />
                     </div>
+                    <p className="recording-status">🎤 Recording - Speak naturally, all words are being captured</p>
                     <button onClick={handlePause} className="btn btn-pause">Pause</button>
                     <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
                 </>

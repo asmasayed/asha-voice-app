@@ -74,16 +74,35 @@ const VisitDetailModal = ({ visit, onClose }) => {
           <button className="close-button" onClick={onClose}>&times;</button>
         </div>
         <div className="modal-body">
-            {/* Now we just pass each data object to our new component.
-                It will automatically handle rendering everything inside.
-            */}
+            {/* Show visit type */}
+            <div className="detail-section">
+                <h3>Visit Information</h3>
+                <DetailRow label="Visit Type" value={visitType} />
+            </div>
+            
+            {/* Basic Information - Always show */}
             <DetailSection title="Basic Information" data={basicInfo} />
-            <DetailSection title="Maternal Health" data={maternalHealth} />
-            <DetailSection title="Child Health" data={childHealth} />
-            <DetailSection title="Vitals" data={vitals} />
-            <DetailSection title="Symptoms" data={symptoms} />
-            <DetailSection title="Medicines" data={medicines} />
-            <DetailSection title="Follow-up" data={followUp} />
+            
+            {/* Conditional sections based on visit type */}
+            {visitType === 'Maternal' && (
+                <>
+                    <DetailSection title="Maternal Health" data={maternalHealth} />
+                    <DetailSection title="Family Planning" data={visit.familyPlanning || {}} />
+                </>
+            )}
+            
+            {visitType === 'Child' && (
+                <>
+                    <DetailSection title="Child Health" data={childHealth} />
+                    <DetailSection title="Immunization" data={visit.immunization || {}} />
+                </>
+            )}
+            
+            {/* General Health - Show for all visit types */}
+            <DetailSection title="General Health" data={visit.generalHealth || {}} />
+            
+            {/* Treatment - Always show */}
+            <DetailSection title="Treatment" data={visit.treatment || {}} />
             </div>
       </div>
     </div>
