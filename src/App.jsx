@@ -32,7 +32,6 @@ function App() {
   const lastProcessedIndexRef = useRef(0);
   const [selectedVisit, setSelectedVisit] = useState(null);
 
-  // --- NEW COMBINED useEffect FOR AUTH AND DATA FETCHING ---
   // This single hook handles both checking the user's login status
   // and fetching their data in the correct order.
   useEffect(() => {

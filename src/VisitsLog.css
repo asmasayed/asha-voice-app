@@ -113,3 +113,19 @@
   color: #868e96;
   opacity: 1; 
 }
+
+.info-with-copy {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px; /* Adds a little space between name and button */
+}
+
+.copy-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem; /* Make the emoji a bit bigger */
+    padding: 0;
+    line-height: 1;
+}

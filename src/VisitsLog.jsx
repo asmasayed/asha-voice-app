@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import './VisitsLog.css'
 import FollowUps from './FollowUps';
 
 // The component now accepts { visits } as a prop
 const VisitsLog = ({ visits, onViewDetails, onDelete, user }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [copiedInfo, setCopiedInfo] = useState(null);
 
   const filteredVisits = visits.filter(visit => {
     // Safely access the patient name, providing a fallback for any missing data
@@ -12,12 +13,36 @@ const VisitsLog = ({ visits, onViewDetails, onDelete, user }) => {
     // Check if the name includes the search term (case-insensitive)
     return patientName.toLowerCase().includes(searchTerm.toLowerCase());
   });
+
+  useEffect(() => {
+    if (copiedInfo) {
+      const timer = setTimeout(() => {
+        setCopiedInfo(null);
+      }, 2000);
+      // Clean up the timer if the component unmounts or copiedInfo changes again
+      return () => clearTimeout(timer);
+    }
+  }, [copiedInfo]);
   
+   const handleCopyToClipboard = async (textToCopy, visitId, field) => {
+    // Make sure there's text to copy
+    if (!textToCopy) return; 
+    
+    try {
+      // Use the modern async clipboard API
+      await navigator.clipboard.writeText(textToCopy);
+      // Set state to show feedback on the correct item
+      setCopiedInfo({ id: visitId, field: field });
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+      // add an error alert here if needed
+    }
+  };
+
   return (
     <div className="page-content">
         <FollowUps userId={user?.uid}/>
         
-        {/* The Search Bar UI - no changes needed here */}
         <div className="search-bar-container">
             <input
                 type="text"
@@ -31,15 +56,26 @@ const VisitsLog = ({ visits, onViewDetails, onDelete, user }) => {
         <h2>Past Visits</h2>
 
         <div className="visits-list">
-            {/* --- THIS IS THE FIX --- */}
-            {/* We now check the length of filteredVisits and map over it */}
             {filteredVisits.length > 0 ? (
                 filteredVisits.map((visit) => (
                     // Each card needs a unique key, we'll use the visit's Firestore ID
                     <div key={visit.id} className="visit-card card">
                         <div className="visit-card-header">
-                            <h3>{visit.basicInfo?.patientName || 'Unknown Patient'}</h3>
+                                <h3>{visit.basicInfo?.patientName || 'Unknown Patient'}</h3>
                             <p>{visit.basicInfo?.age || 'N/A'} years old</p>
+                            {visit.basicInfo?.mobile && (
+                            <div className="info-with-copy">
+                                <p><strong>Phone:</strong> {visit.basicInfo.mobile}</p>
+                                <button 
+                                    className="copy-btn"
+                                    title="Copy phone number"
+                                    onClick={() => handleCopyToClipboard(visit.basicInfo.mobile, visit.id, 'mobile')}
+                                >
+                                    {copiedInfo?.id === visit.id && copiedInfo?.field === 'mobile' ? '✅' : '📋'}
+                                </button>
+                            </div>
+                        )}
+
                         </div>
                         <div className="visit-card-body">
                             <p><strong>Visit Type:</strong> {visit.visitType || 'General'}</p>
@@ -56,7 +92,6 @@ const VisitsLog = ({ visits, onViewDetails, onDelete, user }) => {
                     </div>
                 ))
             ) : (
-                // This section now handles all "not found" cases intelligently
                 <div>
                     {visits.length > 0 ? (
                         <p>No visits found matching your search.</p>
@@ -65,7 +100,6 @@ const VisitsLog = ({ visits, onViewDetails, onDelete, user }) => {
                     )}
                 </div>
             )}
-            {/* --- END OF FIX --- */}
         </div>
     </div>
   );
