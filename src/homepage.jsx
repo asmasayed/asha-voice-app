@@ -158,20 +158,6 @@ const HomePage = ({
         </div>
       ) : (
         <div className="card recording-view">
-            {/* Visit Type Selector */}
-            <div className="visit-type-selector">
-                <label htmlFor="visitType">Visit Type:</label>
-                <select 
-                    id="visitType" 
-                    value={selectedVisitType} 
-                    onChange={handleVisitTypeChange}
-                    className="visit-type-dropdown"
-                >
-                    <option value="General">General</option>
-                    <option value="Maternal">Maternal</option>
-                    <option value="Child">Child</option>
-                </select>
-            </div>
             
             <div className="button-group">
                 {recordingStatus === 'idle' && (

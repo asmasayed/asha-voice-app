@@ -1,9 +1,10 @@
 import React, { useState,useEffect } from 'react';
 import './VisitsLog.css'
 import FollowUps from './FollowUps';
+import VisitCardSkeleton from './VisitCardSkeleton';
 
 // The component now accepts { visits } as a prop
-const VisitsLog = ({ visits, onViewDetails, onDelete, user }) => {
+const VisitsLog = ({ visits, onViewDetails, onDelete, user, isLoading }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [copiedInfo, setCopiedInfo] = useState(null);
 
@@ -56,7 +57,16 @@ const VisitsLog = ({ visits, onViewDetails, onDelete, user }) => {
         <h2>Past Visits</h2>
 
         <div className="visits-list">
-            {filteredVisits.length > 0 ? (
+            {isLoading ? (
+                // If loading, show a few skeleton cards as placeholders
+                <>
+                    <VisitCardSkeleton />
+                    <VisitCardSkeleton />
+                    <VisitCardSkeleton />
+                </>
+            ) : (
+            <>
+                {filteredVisits.length > 0 ? (
                 filteredVisits.map((visit) => (
                     // Each card needs a unique key, we'll use the visit's Firestore ID
                     <div key={visit.id} className="visit-card card">
@@ -99,6 +109,8 @@ const VisitsLog = ({ visits, onViewDetails, onDelete, user }) => {
                         <p>No visits have been recorded yet.</p>
                     )}
                 </div>
+            )}
+            </>
             )}
         </div>
     </div>

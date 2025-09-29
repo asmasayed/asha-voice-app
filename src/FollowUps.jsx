@@ -2,6 +2,7 @@ import './FollowUps.css'
 import React, { useState, useEffect } from 'react';
 import { db } from './firebase'; 
 import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
+import LoadingSpinner from './LoadingSpinner';
 
 // This function now assumes a clean "YYYY-MM-DD" input format and has the typo fixed.
 const formatFollowUpDate = (dateString) => {
@@ -77,7 +78,7 @@ const FollowUps = ({ userId }) => {
     }, [userId]);
 
     if (loading) {
-        return <div className="follow-ups-container"><p>Loading upcoming follow-ups...</p></div>;
+        return  <LoadingSpinner />;;
     }
 
     return (
