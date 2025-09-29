@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import './App.css';
-
-// --- UPDATED IMPORTS (REMOVED .jsx/.js extensions) ---
-// Some build tools prefer imports without file extensions.
+import Toast from './Toast';
+import LoadingSpinner from './LoadingSpinner';
 import parseHindiText from './parseHindiText';
 import Navbar from './Navbar';
 import VisitsLog from './VisitsLog';
@@ -18,8 +17,6 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [visits, setVisits] = useState([]);
-
-  // --- All other state remains the same ---
   const [activePage, setActivePage] = useState('home');
   const [transcribedText, setTranscribedText] = useState('');
   const [recordingStatus, setRecordingStatus] = useState('idle');
@@ -31,19 +28,17 @@ function App() {
   const transcriptBoxRef = useRef(null);
   const lastProcessedIndexRef = useRef(0);
   const [selectedVisit, setSelectedVisit] = useState(null);
+  const [toast, setToast] = useState({ message: '', type: 'success', show: false });
+
 
   // This single hook handles both checking the user's login status
   // and fetching their data in the correct order.
   useEffect(() => {
-    // This variable will hold the function to unsubscribe from the visits listener
     let unsubscribeFromVisits = () => {};
 
-    // First, set up the listener for authentication changes
     const unsubscribeFromAuth = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user); // Set the current user (or null if logged out)
-
+      setCurrentUser(user); 
       if (user) {
-        // --- IF A USER IS LOGGED IN ---
         // 1. Create a query to get their specific visits collection
         const visitsQuery = query(collection(db, "users", user.uid, "visits"));
         
@@ -88,9 +83,11 @@ function App() {
       });
       setParsedData(null);
       setTranscribedText('');
+      showToast('Visit Saved Successfully!', 'success');
       setActivePage('visits');
     } catch (error) {
       console.error("Error saving visit to Firestore:", error);
+      showToast('Failed to save visit. Please try again.', 'error');
     }
   };
   
@@ -290,12 +287,16 @@ function App() {
     setTranscribedText(newTranscript);
 };
 
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type, show: true });
+  };
+
+  const hideToast = () => {
+    setToast((prev) => ({ ...prev, show: false }));
+  };
+
   if (isLoading) {
-    return (
-      <div className="container" style={{ textAlign: 'center', paddingTop: '50px' }}>
-        <p>Loading Application...</p>
-      </div>
-    );
+    return  <LoadingSpinner />;
   }
 
   if (!currentUser) {
@@ -310,6 +311,13 @@ function App() {
           <p>ASHA Voice Assistant</p>
           <button onClick={handleLogout} className="btn btn-retry" style={{maxWidth: '150px', margin: '10px auto'}}>Log Out</button>
         </header>
+        {toast.show && (
+            <Toast
+                message={toast.message}
+                type={toast.type}
+                onClose={hideToast} 
+            />
+        )}
         <main className="container">
           {activePage === 'home' && (
             <HomePage
@@ -329,6 +337,7 @@ function App() {
               handleCancelEdit={handleCancelEdit}
               handleVisitTypeChange={handleVisitTypeChange}
               onAddSpace={handleAddSpace}
+              showToast={showToast}
             />
           )}
           {activePage === 'visits' && <VisitsLog visits={visits} onViewDetails={handleViewDetails} onDelete={handleDeleteVisit} user={currentUser}/>}

@@ -559,3 +559,94 @@ header p {
     -moz-user-select: text;
     -ms-user-select: text;
 }
+.toast {
+  position: fixed; /* Stays in the same place even if the page scrolls */
+  bottom: 20px; /* Sits 20px from the bottom */
+  left: 50%; /* Starts in the middle of the screen */
+  transform: translateX(-50%); /* Precisely centers it */
+  padding: 12px 20px;
+  border-radius: 8px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 9999; 
+  animation: slide-in 0.5s ease-out forwards; /* Applies our custom animation */
+  min-width: 250px;
+}
+
+/* Specific styling for a "success" type toast */
+.toast.success {
+  background-color: #28a745; /* A standard green for success */
+}
+
+/* Specific styling for an "error" type toast */
+.toast.error {
+  background-color: #dc3545; /* A standard red for errors */
+}
+
+.toast-message {
+  margin-right: 15px;
+}
+
+.toast-close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.toast-close-btn:hover {
+  opacity: 1;
+}
+
+/* The animation keyframes for the slide-in effect */
+@keyframes slide-in {
+  from {
+    bottom: -100px; /* Start off-screen */
+    opacity: 0;
+  }
+  to {
+    bottom: 20px; /* End in its final position */
+    opacity: 1;
+  }
+}
+
+/* This container centers the spinner on the entire page */
+.spinner-container-fullscreen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* This container can be used for smaller, inline loading states */
+.spinner-container-inline {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 6px solid #f0f0f0; /* Light grey circle */
+  border-top: 6px solid #4A90E2; /* A nice blue for the spinning part */
+  border-radius: 50%;
+  animation: spin 1.2s linear infinite;
+}
+
+/* The animation that makes it spin */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

@@ -41,7 +41,8 @@ const HomePage = ({
   handleSaveEdit,
   handleCancelEdit,
   handleVisitTypeChange,
-  onAddSpace
+  onAddSpace,
+  showToast
 }) => {
   const [selectionToolbar, setSelectionToolbar] = useState({
         visible: false,

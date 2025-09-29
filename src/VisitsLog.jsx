@@ -62,19 +62,19 @@ const VisitsLog = ({ visits, onViewDetails, onDelete, user }) => {
                     <div key={visit.id} className="visit-card card">
                         <div className="visit-card-header">
                                 <h3>{visit.basicInfo?.patientName || 'Unknown Patient'}</h3>
-                            <p>{visit.basicInfo?.age || 'N/A'} years old</p>
-                            {visit.basicInfo?.mobile && (
-                            <div className="info-with-copy">
-                                <p><strong>Phone:</strong> {visit.basicInfo.mobile}</p>
-                                <button 
-                                    className="copy-btn"
-                                    title="Copy phone number"
-                                    onClick={() => handleCopyToClipboard(visit.basicInfo.mobile, visit.id, 'mobile')}
-                                >
-                                    {copiedInfo?.id === visit.id && copiedInfo?.field === 'mobile' ? '✅' : '📋'}
-                                </button>
-                            </div>
-                        )}
+                                <p>{visit.basicInfo?.age || 'N/A'} years old</p>
+                                {visit.basicInfo?.mobile && (
+                                <div className="info-with-copy">
+                                    <p><strong>Contact:</strong> {visit.basicInfo.mobile}</p>
+                                    <button 
+                                        className="copy-btn"
+                                        title="Copy phone number"
+                                        onClick={() => handleCopyToClipboard(visit.basicInfo.mobile, visit.id, 'mobile')}
+                                    >
+                                        {copiedInfo?.id === visit.id && copiedInfo?.field === 'mobile' ? '✅' : '📋'}
+                                    </button>
+                                </div>
+                                )}
 
                         </div>
                         <div className="visit-card-body">
