@@ -9,6 +9,8 @@ import Schemes from './Schemes';
 import HomePage from './homepage';
 import AuthPage from './AuthPage';
 import { auth, db } from './firebase';
+import { useOnlineStatus } from './hooks/useOnlineStatus';
+import { useOfflineQueue } from './hooks/useOfflineQueue';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, addDoc, serverTimestamp, query, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import VisitDetailModal from './VisitDetailModal';
@@ -32,65 +34,59 @@ function App() {
   const [schemeQuery, setSchemeQuery] = useState('');
     const [schemeResult, setSchemeResult] = useState(null);
 
+  const { queue, addVisitToQueue, clearQueue } = useOfflineQueue();
+  const isOnline = useOnlineStatus();
+
 
   // This single hook handles both checking the user's login status
   // and fetching their data in the correct order.
+  // The old useEffect block in App.jsx
   useEffect(() => {
+    // This will hold our Firestore listener so we can clean it up later
     let unsubscribeFromVisits = () => {};
 
+    // Listen for changes in the user's authentication state
     const unsubscribeFromAuth = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user); 
-      if (user) {
-        // 1. Create a query to get their specific visits collection
-        const visitsQuery = query(collection(db, "users", user.uid, "visits"));
-        
-        // 2. Set up the real-time listener for their visits
-        unsubscribeFromVisits = onSnapshot(visitsQuery, (querySnapshot) => {
-          const visitsData = [];
-          querySnapshot.forEach((doc) => {
-            visitsData.push({ ...doc.data(), id: doc.id });
-          });
-          setVisits(visitsData); // Update the state with the new data
-        });
+        setCurrentUser(user); // Set the current user
 
-      } else {
-        // --- IF NO USER IS LOGGED IN ---
-        setVisits([]); // Ensure the visits list is empty
-      }
+        // --- THIS IS THE CRITICAL FIX ---
+        // Only try to fetch data IF the user object exists.
+        if (user) {
+            // 1. Create a query that is SPECIFIC to this user's ID
+            const visitsQuery = query(collection(db, "users", user.uid, "visits"));
 
-      // Finally, set loading to false. This happens after the auth check is complete.
-      setIsLoading(false);
+            // 2. Set up the real-time listener
+            unsubscribeFromVisits = onSnapshot(visitsQuery, (querySnapshot) => {
+                const visitsData = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+                setVisits(visitsData); // Update state with the user's visits
+            });
+
+        } else {
+            // If there's no user, make sure the visits list is empty
+            // and stop listening to prevent data leaks from other accounts.
+            unsubscribeFromVisits();
+            setVisits([]);
+        }
+
+        // We only stop the main loading spinner after the auth check is complete.
+        setIsLoading(false);
     });
 
-    // This is the main cleanup function for the hook.
-    // It will be called when the component is unmounted.
+    // Cleanup function: This runs when the app closes
     return () => {
-      unsubscribeFromAuth(); // Unsubscribe from the authentication listener
-      unsubscribeFromVisits(); // Unsubscribe from the visits listener
+        unsubscribeFromAuth();
+        unsubscribeFromVisits();
     };
-  }, []); // The empty array [] ensures this effect runs only once when the app starts.
+}, []);
   
 
-  const handleConfirm = async () => {
-    if (!currentUser) {
-      console.error("No user logged in to save visit.");
-      return;
-    }
-    try {
-      const visitsCollectionRef = collection(db, "users", currentUser.uid, "visits");
-      await addDoc(visitsCollectionRef, {
-        ...parsedData,
-        createdAt: serverTimestamp(),
-        userId: currentUser.uid
-      });
-      setParsedData(null);
-      setTranscribedText('');
-      showToast('Visit Saved Successfully!', 'success');
-      setActivePage('visits');
-    } catch (error) {
-      console.error("Error saving visit to Firestore:", error);
-      showToast('Failed to save visit. Please try again.', 'error');
-    }
+  const handleConfirm = (dataToSave) => {
+    addVisitToQueue(dataToSave);
+    setParsedData(null);
+    setTranscribedText('');
+    accumulatedTranscriptRef.current = '';
+    showToast('Visit saved locally!', 'success');
+    setActivePage('visits');
   };
   
   // --- All other handler functions and render logic below this line are unchanged ---
@@ -189,9 +185,9 @@ function App() {
     // Don't modify accumulated text on pause - it's already preserved
   };
 
-  const handleStop = () => {
-    // Ensure we have the most up-to-date accumulated text
-    const finalTranscript = accumulatedTranscriptRef.current || transcribedText;
+  const handleStop = (manualText = null) => {
+    // Determine transcript from manual input when offline, else use accumulated
+    const finalTranscript = manualText !== null ? manualText : (accumulatedTranscriptRef.current || transcribedText);
     if (recordingStatus === 'recording' && recognitionRef.current) {
       recognitionRef.current.stop();
     }
@@ -297,6 +293,28 @@ function App() {
     setToast((prev) => ({ ...prev, show: false }));
   };
 
+  const handleSync = async () => {
+    if (queue.length === 0) {
+      showToast('No visits to sync.', 'success');
+      return;
+    }
+    showToast(`Syncing ${queue.length} visits...`, 'success');
+    try {
+      for (const visit of queue) {
+        const { isLocal, id, ...visitToSave } = visit;
+        await addDoc(collection(db, "users", currentUser.uid, "visits"), {
+          ...visitToSave,
+          createdAt: serverTimestamp(),
+        });
+      }
+      clearQueue();
+      showToast('Sync successful!', 'success');
+    } catch (error) {
+      console.error("Sync failed:", error);
+      showToast('Sync failed. Please try again.', 'error');
+    }
+  };
+
   if (isLoading) {
     return  <LoadingSpinner />;
   }
@@ -340,9 +358,10 @@ function App() {
               handleVisitTypeChange={handleVisitTypeChange}
               onAddSpace={handleAddSpace}
               showToast={showToast}
+              isOnline={isOnline}
             />
           )}
-          {activePage === 'visits' && <VisitsLog visits={visits} onViewDetails={handleViewDetails} onDelete={handleDeleteVisit} user={currentUser}/>}
+          {activePage === 'visits' && <VisitsLog visits={visits} onViewDetails={handleViewDetails} onDelete={handleDeleteVisit} user={currentUser} handleSync={handleSync} queue={queue} isOnline={isOnline}/>}
           {activePage === 'schemes' && (
             <Schemes 
               schemeQuery={schemeQuery}

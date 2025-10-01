@@ -1,4 +1,5 @@
 import { useState} from  'react';
+import './App.css'
 
 // A reusable component for displaying and editing a single field.
 // It's kept here because it is only used by the HomePage.
@@ -42,13 +43,15 @@ const HomePage = ({
   handleCancelEdit,
   handleVisitTypeChange,
   onAddSpace,
-  showToast
+  showToast,
+  isOnline
 }) => {
   const [selectionToolbar, setSelectionToolbar] = useState({
         visible: false,
         top: 0,
         left: 0,
     });
+  const [manualText, setManualText] = useState('');
 
     // Helper to hide the toolbar
     const hideToolbar = () => {
@@ -177,46 +180,62 @@ const HomePage = ({
             {/* --- FINAL ACTION BUTTONS --- */}
             <div className="button-group-confirm">
                 <button onClick={handleRetry} className="btn btn-retry">Record Again</button>
-                <button onClick={handleConfirm} className="btn btn-confirm">Confirm & Save</button>
+                <button onClick={() => handleConfirm(parsedData)} className="btn btn-confirm">Confirm & Save</button>
             </div>
         </div>
       ) : (
         <div className="card recording-view">
-            
-            <div className="button-group">
-                {recordingStatus === 'idle' && (
-                <div className="mic-wrapper">
-                    <div onClick={handleStartOrResume} className="mic-button">
-                    <img src="/mic.png" alt="Microphone icon" />
+            {isOnline ? (
+              <>
+                <div className="button-group">
+                    {recordingStatus === 'idle' && (
+                    <div className="mic-wrapper">
+                        <div onClick={handleStartOrResume} className="mic-button">
+                        <img src="/mic.png" alt="Microphone icon" />
+                        </div>
+                        <p className="mic-text">Press to Record</p>
                     </div>
-                    <p className="mic-text">Press to Record</p>
+                    )}
+                    {recordingStatus === 'recording' && (
+                    <>
+                        <div className="mic-button is-recording">
+                        <img src="/mic.png" alt="Recording icon" />
+                        </div>
+                        <button onClick={handlePause} className="btn btn-pause">Pause</button>
+                        <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
+                    </>
+                    )}
+                    {recordingStatus === 'paused' && (
+                    <>
+                        <div className="mic-button is-paused">
+                        <img src="/mic.png" alt="Paused icon" />
+                        </div>
+                        <button onClick={handleStartOrResume} className="btn btn-resume">Resume</button>
+                        <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
+                    </>
+                    )}
                 </div>
-                )}
-                {recordingStatus === 'recording' && (
-                <>
-                    <div className="mic-button is-recording">
-                    <img src="/mic.png" alt="Recording icon" />
+                {recordingStatus !== 'idle' && (
+                    <div ref={transcriptBoxRef} className="transcript-box"  onMouseUp={handleTextSelection}>
+                    <p>{transcribedText || "Your recorded text will appear here..."}</p>
                     </div>
-                    <button onClick={handlePause} className="btn btn-pause">Pause</button>
-                    <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
-                    
-            
-                </>
                 )}
-                {recordingStatus === 'paused' && (
-                <>
-                    <div className="mic-button is-paused">
-                    <img src="/mic.png" alt="Paused icon" />
-                    </div>
-                    <button onClick={handleStartOrResume} className="btn btn-resume">Resume</button>
-                    <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
-                </>
-                )}
-            </div>
-            {recordingStatus !== 'idle' && (
-                <div ref={transcriptBoxRef} className="transcript-box"  onMouseUp={handleTextSelection}>
-                <p>{transcribedText || "Your recorded text will appear here..."}</p>
-                </div>
+              </>
+            ) : (
+              <div className="offline-container">
+                <h3>📶 You are offline.</h3>
+                <p>Please type the visit details below.</p>
+                <textarea
+                  className="offline-textarea"
+                  rows="6"
+                  value={manualText}
+                  onChange={(e) => setManualText(e.target.value)}
+                  placeholder="रोगी का नाम है शीला, उम्र 40 साल..."
+                ></textarea>
+                <button className="btn btn-primary" onClick={() => handleStop(manualText)}>
+                  Parse Text
+                </button>
+              </div>
             )}
         </div>
       )}

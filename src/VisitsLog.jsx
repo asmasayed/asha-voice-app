@@ -4,16 +4,26 @@ import FollowUps from './FollowUps';
 import VisitCardSkeleton from './VisitCardSkeleton';
 
 // The component now accepts { visits } as a prop
-const VisitsLog = ({ visits, onViewDetails, onDelete, user, isLoading }) => {
+const VisitsLog = ({ visits, onViewDetails, onDelete, user, isLoading, handleSync, queue = [], isOnline = true }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [copiedInfo, setCopiedInfo] = useState(null);
 
-  const filteredVisits = visits.filter(visit => {
+  const allVisits = [...queue, ...visits];
+
+  const filteredVisits = allVisits.filter(visit => {
     // Safely access the patient name, providing a fallback for any missing data
     const patientName = visit.basicInfo?.patientName || '';
     // Check if the name includes the search term (case-insensitive)
     return patientName.toLowerCase().includes(searchTerm.toLowerCase());
   });
+
+   if (isLoading) {
+    return (
+      <div className="page-content">
+        <p>Loading visits...</p>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (copiedInfo) {
@@ -40,9 +50,19 @@ const VisitsLog = ({ visits, onViewDetails, onDelete, user, isLoading }) => {
     }
   };
 
+
   return (
     <div className="page-content">
         <FollowUps userId={user?.uid}/>
+        {isOnline && queue.length > 0 && (
+          <div className="sync-container card">
+            <h3>{queue.length} visit(s) saved locally.</h3>
+            <p>Connect to the internet and sync to save them to the cloud.</p>
+            <button onClick={handleSync} className="btn btn-confirm">
+              Sync to Cloud
+            </button>
+          </div>
+        )}
         
         <div className="search-bar-container">
             <input
@@ -71,7 +91,7 @@ const VisitsLog = ({ visits, onViewDetails, onDelete, user, isLoading }) => {
                     // Each card needs a unique key, we'll use the visit's Firestore ID
                     <div key={visit.id} className="visit-card card">
                         <div className="visit-card-header">
-                                <h3>{visit.basicInfo?.patientName || 'Unknown Patient'}</h3>
+                                <h3>{visit.basicInfo?.patientName || 'Unknown Patient'} {visit.isLocal && <span className="local-tag">Not Synced</span>}</h3>
                                 <p>{visit.basicInfo?.age || 'N/A'} years old</p>
                                 {visit.basicInfo?.mobile && (
                                 <div className="info-with-copy">
