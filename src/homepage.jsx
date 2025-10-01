@@ -80,6 +80,30 @@ const HomePage = ({
     };
   return (
     <>
+
+      {selectionToolbar.visible && (
+       <div
+              className="selection-toolbar"
+              style={{ top: selectionToolbar.top, left: selectionToolbar.left }}
+          >
+              <button
+                  onClick={() => {
+                      const selection = window.getSelection();
+                      if (selection && selection.rangeCount > 0) {
+                          // Get the exact cursor position from the selection
+                          const cursorPosition = selection.getRangeAt(0).startOffset;
+                          // Call the onAddSpace function passed from App.jsx
+                          onAddSpace(cursorPosition);
+                      }
+                      // Hide the toolbar and clear the selection after use
+                      hideToolbar();
+                      selection.removeAllRanges();
+                  }}
+              >
+                  Add Space
+              </button>
+          </div>
+      )}
       {parsedData ? (
         <div className="card confirmation-card">
             <h2>Confirm Visit Details</h2>

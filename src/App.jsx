@@ -29,6 +29,8 @@ function App() {
   const lastProcessedIndexRef = useRef(0);
   const [selectedVisit, setSelectedVisit] = useState(null);
   const [toast, setToast] = useState({ message: '', type: 'success', show: false });
+  const [schemeQuery, setSchemeQuery] = useState('');
+    const [schemeResult, setSchemeResult] = useState(null);
 
 
   // This single hook handles both checking the user's login status
@@ -341,7 +343,18 @@ function App() {
             />
           )}
           {activePage === 'visits' && <VisitsLog visits={visits} onViewDetails={handleViewDetails} onDelete={handleDeleteVisit} user={currentUser}/>}
-          {activePage === 'schemes' && <Schemes />}
+          {activePage === 'schemes' && (
+            <Schemes 
+              schemeQuery={schemeQuery}
+              setSchemeQuery={setSchemeQuery}
+              schemeResult={schemeResult}
+              setSchemeResult={setSchemeResult}
+              recognitionRef={recognitionRef}
+              accumulatedTranscriptRef={accumulatedTranscriptRef}
+              recordingStatus={recordingStatus}
+              setRecordingStatus={setRecordingStatus}
+            />
+          )}
         </main>
       </div>
       <Navbar activePage={activePage} onNavigate={handleNavigate} />
