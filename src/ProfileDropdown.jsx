@@ -1,13 +1,13 @@
 import React from 'react';
 
-const ProfileDropdown = ({ user, onLogout, isOpen, onToggle }) => {
+const ProfileDropdown = ({ user, onLogout, isOpen, onToggle, dropdownRef }) => {
   // If there's no user, don't render anything.
   if (!user) {
     return null;
   }
 
   return (
-    <div className="profile-dropdown-container">
+    <div ref={dropdownRef}className="profile-dropdown-container">
       <button onClick={onToggle} className="profile-picture-button">
         {/* Use the user's Google profile picture, or a fallback initial */}
         {user.photoURL ? (

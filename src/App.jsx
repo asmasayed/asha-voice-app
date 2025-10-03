@@ -37,6 +37,7 @@ function App() {
   const accumulatedTranscriptRef = useRef('');
   const transcriptBoxRef = useRef(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     let unsubscribeFromVisits = () => {};
@@ -82,6 +83,22 @@ function App() {
   useEffect(() => {
   setIsDropdownOpen(false);
   }, [currentUser]);
+
+  useEffect(()=>{
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        // If the click was outside, close the dropdown.
+        setIsDropdownOpen(false);
+      }
+    }
+    if (isDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      // Remove the event listener when the dropdown is closed or the page changes.
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isDropdownOpen]);
 
   const setupRecognition = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -289,6 +306,7 @@ function App() {
             onLogout={handleLogout}
             isOpen={isDropdownOpen}
             onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
+            dropdownRef={dropdownRef}
           />
         </header>
         {toast.show && (
