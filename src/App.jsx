@@ -12,8 +12,10 @@ import { auth, db } from './firebase';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { useOfflineQueue } from './hooks/useOfflineQueue';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { collection, addDoc, serverTimestamp, query, onSnapshot, doc, deleteDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, query, onSnapshot, doc, deleteDoc, getDoc } from "firebase/firestore";
 import VisitDetailModal from './VisitDetailModal';
+import ProfileDropdown from './ProfileDropdown';
+import './ProfileDropdown.css'
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -29,25 +31,43 @@ function App() {
   const [toast, setToast] = useState({ message: '', type: 'success', show: false });
   const [schemeQuery, setSchemeQuery] = useState('');
   const [schemeResult, setSchemeResult] = useState(null);
-
   const { queue, addVisitToQueue, clearQueue, removeVisitFromQueue } = useOfflineQueue();
   const isOnline = useOnlineStatus();
-
   const recognitionRef = useRef(null);
   const accumulatedTranscriptRef = useRef('');
   const transcriptBoxRef = useRef(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     let unsubscribeFromVisits = () => {};
-    const unsubscribeFromAuth = onAuthStateChanged(auth, (user) => {
+    const unsubscribeFromAuth = onAuthStateChanged(auth, async(user) => {
       setCurrentUser(user);
       if (user) {
+        const authUserInfo = {
+                uid: user.uid,
+                email: user.email,
+                photoURL: user.photoURL,
+                displayName: user.displayName, 
+            };
+
+           const userDocRef = doc(db, 'users', user.uid);
+            const userDocSnap = await getDoc(userDocRef);
+
+            let customUserInfo = {};
+            if (userDocSnap.exists()) {
+                customUserInfo = userDocSnap.data();
+            }
+
+            setCurrentUser({ ...authUserInfo, ...customUserInfo });
+
+
         const visitsQuery = query(collection(db, "users", user.uid, "visits"));
         unsubscribeFromVisits = onSnapshot(visitsQuery, (querySnapshot) => {
           const visitsData = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
           setVisits(visitsData);
         });
       } else {
+        setCurrentUser(null);
         unsubscribeFromVisits();
         setVisits([]);
       }
@@ -58,6 +78,10 @@ function App() {
       unsubscribeFromVisits();
     };
   }, []);
+
+  useEffect(() => {
+  setIsDropdownOpen(false);
+  }, [currentUser]);
 
   const setupRecognition = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -256,9 +280,16 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>आशा सहायक</h1>
-          <p>ASHA Voice Assistant</p>
-          <button onClick={handleLogout} className="btn btn-retry" style={{maxWidth: '150px', margin: '10px auto'}}>Log Out</button>
+          <div className="header-content">
+            <h1>आशा सहायक</h1>
+            <p>ASHA Voice Assistant</p>
+          </div>
+          <ProfileDropdown
+            user={currentUser}
+            onLogout={handleLogout}
+            isOpen={isDropdownOpen}
+            onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
+          />
         </header>
         {toast.show && (
           <Toast message={toast.message} type={toast.type} onClose={hideToast} />
