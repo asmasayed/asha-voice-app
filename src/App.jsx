@@ -25,60 +25,124 @@ function App() {
   const [parsedData, setParsedData] = useState(null);
   const [editingField, setEditingField] = useState(null);
   const [selectedVisitType, setSelectedVisitType] = useState('General');
-  const recognitionRef = useRef(null);
-  const accumulatedTranscriptRef = useRef('');
-  const transcriptBoxRef = useRef(null);
-  const lastProcessedIndexRef = useRef(0);
   const [selectedVisit, setSelectedVisit] = useState(null);
   const [toast, setToast] = useState({ message: '', type: 'success', show: false });
   const [schemeQuery, setSchemeQuery] = useState('');
-    const [schemeResult, setSchemeResult] = useState(null);
+  const [schemeResult, setSchemeResult] = useState(null);
 
-  const { queue, addVisitToQueue, clearQueue } = useOfflineQueue();
+  const { queue, addVisitToQueue, clearQueue, removeVisitFromQueue } = useOfflineQueue();
   const isOnline = useOnlineStatus();
 
+  const recognitionRef = useRef(null);
+  const accumulatedTranscriptRef = useRef('');
+  const transcriptBoxRef = useRef(null);
 
-  // This single hook handles both checking the user's login status
-  // and fetching their data in the correct order.
-  // The old useEffect block in App.jsx
   useEffect(() => {
-    // This will hold our Firestore listener so we can clean it up later
     let unsubscribeFromVisits = () => {};
-
-    // Listen for changes in the user's authentication state
     const unsubscribeFromAuth = onAuthStateChanged(auth, (user) => {
-        setCurrentUser(user); // Set the current user
-
-        // --- THIS IS THE CRITICAL FIX ---
-        // Only try to fetch data IF the user object exists.
-        if (user) {
-            // 1. Create a query that is SPECIFIC to this user's ID
-            const visitsQuery = query(collection(db, "users", user.uid, "visits"));
-
-            // 2. Set up the real-time listener
-            unsubscribeFromVisits = onSnapshot(visitsQuery, (querySnapshot) => {
-                const visitsData = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-                setVisits(visitsData); // Update state with the user's visits
-            });
-
-        } else {
-            // If there's no user, make sure the visits list is empty
-            // and stop listening to prevent data leaks from other accounts.
-            unsubscribeFromVisits();
-            setVisits([]);
-        }
-
-        // We only stop the main loading spinner after the auth check is complete.
-        setIsLoading(false);
-    });
-
-    // Cleanup function: This runs when the app closes
-    return () => {
-        unsubscribeFromAuth();
+      setCurrentUser(user);
+      if (user) {
+        const visitsQuery = query(collection(db, "users", user.uid, "visits"));
+        unsubscribeFromVisits = onSnapshot(visitsQuery, (querySnapshot) => {
+          const visitsData = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+          setVisits(visitsData);
+        });
+      } else {
         unsubscribeFromVisits();
+        setVisits([]);
+      }
+      setIsLoading(false);
+    });
+    return () => {
+      unsubscribeFromAuth();
+      unsubscribeFromVisits();
     };
-}, []);
-  
+  }, []);
+
+  const setupRecognition = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Your browser doesn't support Speech Recognition.");
+      return null;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'hi-IN';
+    recognition.interimResults = true;
+    recognition.continuous = true;
+
+    recognition.onresult = (event) => {
+      let interimTranscript = '';
+      let finalTranscriptChunk = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscriptChunk += event.results[i][0].transcript + ' ';
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+      if (finalTranscriptChunk) {
+        accumulatedTranscriptRef.current += finalTranscriptChunk;
+      }
+      setTranscribedText(accumulatedTranscriptRef.current + interimTranscript);
+    };
+    
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+    };
+    
+    return recognition;
+  };
+
+  const handleStartOrResume = () => {
+    if (recordingStatus === 'recording') return;
+
+    if (recordingStatus === 'idle') {
+      accumulatedTranscriptRef.current = '';
+      setTranscribedText('');
+    }
+
+    recognitionRef.current = setupRecognition();
+    if (recognitionRef.current) {
+      recognitionRef.current.start();
+      setRecordingStatus('recording');
+    }
+  };
+
+  const handlePause = () => {
+    if (recognitionRef.current && recordingStatus === 'recording') {
+      recognitionRef.current.stop();
+      setRecordingStatus('paused');
+    }
+  };
+
+  // --- START: DEFINITIVELY FIXED handleStop FUNCTION ---
+  const handleStop = (arg) => {
+    if (recognitionRef.current && recordingStatus === 'recording') {
+      recognitionRef.current.stop();
+    }
+
+    // This is the new, robust logic. It checks if the argument is a string.
+    // If it's not (i.e., it's a click event), it uses the voice transcript.
+    const finalTranscript = typeof arg === 'string'
+      ? arg
+      : (accumulatedTranscriptRef.current || '');
+
+    if (finalTranscript.trim() === '') {
+      console.log("No text to parse. Resetting.");
+      setRecordingStatus('idle');
+      setTranscribedText('');
+      accumulatedTranscriptRef.current = '';
+      return;
+    }
+
+    console.log("Final text being sent to parser:", finalTranscript);
+    const data = parseHindiText(finalTranscript, selectedVisitType);
+    console.log("Parsed data received:", data);
+
+    setParsedData(data);
+    setRecordingStatus('idle');
+  };
+  // --- END: DEFINITIVELY FIXED handleStop FUNCTION ---
 
   const handleConfirm = (dataToSave) => {
     addVisitToQueue(dataToSave);
@@ -88,8 +152,6 @@ function App() {
     showToast('Visit saved locally!', 'success');
     setActivePage('visits');
   };
-  
-  // --- All other handler functions and render logic below this line are unchanged ---
 
   const handleLogout = async () => {
     try {
@@ -99,114 +161,15 @@ function App() {
     }
   };
 
-  const handleStartOrResume = () => {
-    // Always preserve the current transcribed text
-    accumulatedTranscriptRef.current = transcribedText;
-    // Reset the processed index for new session
-    lastProcessedIndexRef.current = 0;
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert("Your browser doesn't support Speech Recognition. Please use Chrome.");
-      return;
-    }
-    recognitionRef.current = new SpeechRecognition();
-    const recognition = recognitionRef.current;
-    recognition.lang = 'hi-IN';
-    recognition.interimResults = true;
-    recognition.continuous = true;
-    
-    recognition.onresult = (event) => {
-      let interimTranscript = '';
-      let newFinalText = '';
-      
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          // Only process results we haven't seen before
-          if (i >= lastProcessedIndexRef.current) {
-            newFinalText += event.results[i][0].transcript;
-            lastProcessedIndexRef.current = i + 1;
-          }
-        } else {
-          // Interim result - show as temporary
-          interimTranscript += event.results[i][0].transcript;
-        }
-      }
-      
-      // Add new final text to accumulated text
-      if (newFinalText) {
-        accumulatedTranscriptRef.current += newFinalText;
-      }
-      
-      setTranscribedText(accumulatedTranscriptRef.current + interimTranscript);
-    };
-    
-    recognition.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
-      // On error, preserve accumulated text and try to restart
-      if (event.error === 'no-speech' || event.error === 'audio-capture') {
-        // These errors are common and we should try to restart
-        setTimeout(() => {
-          if (recordingStatus === 'recording') {
-            try {
-              recognition.start();
-            } catch (e) {
-              console.log('Recognition restart failed:', e);
-            }
-          }
-        }, 1000);
-      }
-    };
-    
-    recognition.onend = () => {
-      // When recognition ends naturally, preserve the accumulated text
-      if (recordingStatus === 'recording') {
-        // Try to restart recognition automatically
-        setTimeout(() => {
-          if (recordingStatus === 'recording') {
-            try {
-              recognition.start();
-            } catch (e) {
-              console.log('Auto-restart failed:', e);
-            }
-          }
-        }, 100);
-      }
-    };
-    
-    recognition.start();
-    setRecordingStatus('recording');
-  };
-
-  const handlePause = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-      setRecordingStatus('paused');
-    }
-    // Don't modify accumulated text on pause - it's already preserved
-  };
-
-  const handleStop = (manualText = null) => {
-    // Determine transcript from manual input when offline, else use accumulated
-    const finalTranscript = manualText !== null ? manualText : (accumulatedTranscriptRef.current || transcribedText);
-    if (recordingStatus === 'recording' && recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-    const data = parseHindiText(finalTranscript, selectedVisitType);
-    setParsedData(data);
-    setRecordingStatus('idle');
-    // Don't clear accumulated text here - let it persist for potential retry
-  };
-
   const handleRetry = () => {
     setParsedData(null);
     setTranscribedText('');
     accumulatedTranscriptRef.current = '';
-    lastProcessedIndexRef.current = 0;
+    setRecordingStatus('idle');
   };
 
-  const handleEdit = (fieldName) => {
-    setEditingField(fieldName);
-  };
+  const handleEdit = (fieldName) => setEditingField(fieldName);
+  const handleCancelEdit = () => setEditingField(null);
 
   const handleSaveEdit = (event) => {
     event.preventDefault();
@@ -225,80 +188,46 @@ function App() {
     setEditingField(null);
   };
 
-  const handleCancelEdit = () => {
-    setEditingField(null);
-  };
-
-  const handleVisitTypeChange = (event) => {
-    setSelectedVisitType(event.target.value);
-  };
-
-  const handleNavigate = (page) => {
-    setActivePage(page);
-  };
-
-  const handleViewDetails = (visit) => {
-  console.log("Viewing details for visit:", visit);
-  setSelectedVisit(visit);
-  };  
-
-  const handleCloseModal = () => {
-    setSelectedVisit(null);
-  };
+  const handleVisitTypeChange = (event) => setSelectedVisitType(event.target.value);
+  const handleNavigate = (page) => setActivePage(page);
+  const handleViewDetails = (visit) => setSelectedVisit(visit);
+  const handleCloseModal = () => setSelectedVisit(null);
 
   const handleDeleteVisit = async (visitIdToDelete) => {
-    // Use a simple confirmation dialog before deleting
-    if (!window.confirm("Are you sure you want to delete this visit record? This action cannot be undone.")) {
-      return; // If the user clicks "Cancel", stop the function
-    }
-
-    try {
-      // Create a reference to the specific document to be deleted
-      // The path must match exactly: users/{userId}/visits/{visitId}
-      const visitDocRef = doc(db, 'users', currentUser.uid, 'visits', visitIdToDelete);
-
-      // Delete the document from Firestore
-      await deleteDoc(visitDocRef);
-
-      // Update the local state to remove the visit from the UI instantly
-      setVisits(currentVisits => currentVisits.filter(visit => visit.id !== visitIdToDelete));
-      
-      console.log("Visit deleted successfully!");
-
-    } catch (error) {
-      console.error("Error deleting visit: ", error);
-      alert("There was an error deleting the visit. Please try again.");
-    }
-  };  
-
-  const handleAddSpace = (cursorPosition) => {
-    // We receive cursorPosition as an argument, so we don't declare it again.
-    
-    if (typeof cursorPosition !== 'number') return;
-
-    const newTranscript = 
-        transcribedText.slice(0, cursorPosition) +
-        ' ' +
-        transcribedText.slice(cursorPosition);
-    
-    // Update the state with the corrected text
-    setTranscribedText(newTranscript);
-};
-
-  const showToast = (message, type = 'success') => {
-    setToast({ message, type, show: true });
-  };
-
-  const hideToast = () => {
-    setToast((prev) => ({ ...prev, show: false }));
-  };
-
-  const handleSync = async () => {
-    if (queue.length === 0) {
-      showToast('No visits to sync.', 'success');
+    if (!window.confirm("Are you sure you want to delete this visit record?")) {
       return;
     }
-    showToast(`Syncing ${queue.length} visits...`, 'success');
+    const isLocalVisit = queue.some(visit => visit.id === visitIdToDelete);
+    if (isLocalVisit) {
+      try {
+        removeVisitFromQueue(visitIdToDelete);
+        showToast('Local visit deleted!', 'success');
+      } catch (error) {
+        showToast('Failed to delete local visit.', 'error');
+      }
+    } else {
+      try {
+        const visitDocRef = doc(db, 'users', currentUser.uid, 'visits', visitIdToDelete);
+        await deleteDoc(visitDocRef);
+        showToast('Visit deleted from cloud!', 'success');
+      } catch (error) {
+        showToast('Failed to delete visit.', 'error');
+      }
+    }
+  };
+
+  const handleAddSpace = (cursorPosition) => {
+    if (typeof cursorPosition !== 'number') return;
+    const newTranscript = transcribedText.slice(0, cursorPosition) + ' ' + transcribedText.slice(cursorPosition);
+    setTranscribedText(newTranscript);
+  };
+
+  const showToast = (message, type = 'success') => setToast({ message, type, show: true });
+  const hideToast = () => setToast((prev) => ({ ...prev, show: false }));
+
+  const handleSync = async () => {
+    if (queue.length === 0) return;
+    showToast(`Syncing ${queue.length} visit(s)...`, 'success');
     try {
       for (const visit of queue) {
         const { isLocal, id, ...visitToSave } = visit;
@@ -311,12 +240,12 @@ function App() {
       showToast('Sync successful!', 'success');
     } catch (error) {
       console.error("Sync failed:", error);
-      showToast('Sync failed. Please try again.', 'error');
+      showToast('Sync failed.', 'error');
     }
   };
 
   if (isLoading) {
-    return  <LoadingSpinner />;
+    return <LoadingSpinner />;
   }
 
   if (!currentUser) {
@@ -332,11 +261,7 @@ function App() {
           <button onClick={handleLogout} className="btn btn-retry" style={{maxWidth: '150px', margin: '10px auto'}}>Log Out</button>
         </header>
         {toast.show && (
-            <Toast
-                message={toast.message}
-                type={toast.type}
-                onClose={hideToast} 
-            />
+          <Toast message={toast.message} type={toast.type} onClose={hideToast} />
         )}
         <main className="container">
           {activePage === 'home' && (
@@ -368,18 +293,12 @@ function App() {
               setSchemeQuery={setSchemeQuery}
               schemeResult={schemeResult}
               setSchemeResult={setSchemeResult}
-              recognitionRef={recognitionRef}
-              accumulatedTranscriptRef={accumulatedTranscriptRef}
-              recordingStatus={recordingStatus}
-              setRecordingStatus={setRecordingStatus}
-            />
-          )}
+            />
+          )}
         </main>
       </div>
       <Navbar activePage={activePage} onNavigate={handleNavigate} />
-      {/* --- Render the Modal if a visit is selected --- */}
       <VisitDetailModal visit={selectedVisit} onClose={handleCloseModal} />
-
     </>
   );
 }

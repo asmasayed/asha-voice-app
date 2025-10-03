@@ -20,8 +20,19 @@ export const useOfflineQueue = () => {
     setQueue([]);
     window.localStorage.removeItem(QUEUE_STORAGE_KEY);
   };
+  
+  const removeVisitFromQueue = (visitId) => {
+    // Create a new array that excludes the visit with the matching ID
+    const newQueue = queue.filter(visit => visit.id !== visitId);
+    
+    // Update the state
+    setQueue(newQueue);
+    
+    // Update localStorage with the new, smaller queue
+    window.localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(newQueue));
+  };
 
-  return { queue, addVisitToQueue, clearQueue };
+  return { queue, addVisitToQueue, clearQueue, removeVisitFromQueue }; 
 };
 
 
