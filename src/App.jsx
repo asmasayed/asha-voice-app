@@ -322,17 +322,18 @@ const handleStopSchemeSearch = (query) => {
   // Use the final query from state, or the direct argument if available
   const finalQuery = query || schemeQuery;
   if (finalQuery.trim()) {
-    const result = findBestSchemeMatch(finalQuery); // Assuming this function is available or imported in App.jsx
+    const result = findMultipleSchemeMatches(finalQuery); // Updated to use new function
     setSchemeResult(result);
-  }
+  }
 };
 
-const findBestSchemeMatch = (query) => {
-    if (!query) return null;
+const findMultipleSchemeMatches = (query) => {
+  if (!query) return [];
+
 
     const normalizedQuery = normalizeText(query);
     const queryWords = normalizedQuery.split(/\s+/).filter(word => word.length > 1);
-
+    const schemeMatches = [];
     let bestMatch = null;
     let maxScore = 0;
 
@@ -362,11 +363,53 @@ const findBestSchemeMatch = (query) => {
         if (pattern.test(normalizedQuery)) {
             const matchingScheme = schemeData.find(scheme => scheme.Scheme_ID === schemeId);
             if (matchingScheme) {
-                return matchingScheme;
-            }
-        }
-    }
+              schemeMatches.push({ scheme: matchingScheme, score: score });
+          }
+      }
+  }
 
+  // Enhanced filtering for maternal queries to exclude irrelevant disease protocols
+  const isMaternalQuery = normalizedQuery.includes('प्रेग्नेंट') || 
+                         normalizedQuery.includes('गर्भवती') || 
+                         normalizedQuery.includes('मातृत्व') ||
+                         normalizedQuery.includes('pregnant') ||
+                         normalizedQuery.includes('maternal');
+  
+  const isChildQuery = normalizedQuery.includes('बच्चे') || 
+                      normalizedQuery.includes('शिशु') || 
+                      normalizedQuery.includes('बच्चा') ||
+                      normalizedQuery.includes('child') ||
+                      normalizedQuery.includes('baby');
+  
+  const isImmunizationQuery = normalizedQuery.includes('टीके') || 
+                             normalizedQuery.includes('टीका') || 
+                             normalizedQuery.includes('वैक्सीन') ||
+                             normalizedQuery.includes('immunization') ||
+                             normalizedQuery.includes('vaccine') ||
+                             normalizedQuery.includes('vaccination');
+  
+  // Enhanced filtering to show only truly relevant schemes
+  const shouldExcludeScheme = (scheme) => {
+      if (isMaternalQuery) {
+          // Exclude general disease protocols for maternal queries
+          const generalDiseaseProtocols = ['D2', 'D3', 'D4', 'D5']; // Malaria, Dengue, Leprosy, NCD
+          return generalDiseaseProtocols.includes(scheme.Scheme_ID);
+      }
+      
+      if (isChildQuery) {
+          // Exclude adult-specific schemes for child queries
+          const adultSchemes = ['D5', 'F1', 'F2', 'F3', 'F4', 'F5']; // NCD, Family Planning
+          return adultSchemes.includes(scheme.Scheme_ID);
+      }
+      
+      if (isImmunizationQuery) {
+          // For immunization queries, only show immunization-related schemes
+          const immunizationSchemes = ['I1', 'I2', 'I3', 'I4']; // Immunization schemes only
+          return !immunizationSchemes.includes(scheme.Scheme_ID);
+      }
+      
+      return false;
+    };
     // Create keyword variations for better matching
     const createKeywordVariations = (word) => {
         const variations = [word];
@@ -571,14 +614,21 @@ const findBestSchemeMatch = (query) => {
             currentScore += 4;
         }
 
-        if (currentScore > maxScore) {
-            maxScore = currentScore;
-            bestMatch = scheme;
-        }
-    });
+        // Add scheme to matches if it has a score of at least 1 and passes filtering
+        if (currentScore >= 1 && !shouldExcludeScheme(scheme)) {
+          schemeMatches.push({ scheme: scheme, score: currentScore });
+      }
+  });
+  const sortedMatches = schemeMatches
+  .sort((a, b) => b.score - a.score);
 
-    // Require at least 1 matching keyword for a confident answer
-    return maxScore >= 1 ? bestMatch : null;
+// Only return schemes with meaningful scores (at least 2 points for relevance)
+// Show at most 5 schemes, but only if they are relevant
+return sortedMatches
+  .filter(match => match.score >= 2)
+  .slice(0, 5)
+  .map(match => match.scheme);
+
 };
 
   const showToast = (message, type = 'success') => setToast({ message, type, show: true });
