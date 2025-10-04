@@ -236,8 +236,10 @@ const HomePage = ({
                       <div className="mic-button is-recording">
                         <img src="/mic.png" alt="Recording icon" />
                       </div>
-                      <button onClick={handlePause} className="btn btn-pause">Pause</button>
-                      <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
+                      <div className="button-group-horizontal">
+                        <button onClick={handlePause} className="btn btn-pause">Pause</button>
+                        <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
+                      </div>
                     </>
                   )}
                   {recordingStatus === 'paused' && (
@@ -245,8 +247,10 @@ const HomePage = ({
                       <div className="mic-button is-paused">
                         <img src="/mic.png" alt="Paused icon" />
                       </div>
-                      <button onClick={handleStartOrResume} className="btn btn-resume">Resume</button>
-                      <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
+                      <div className="button-group-horizontal">
+                        <button onClick={handleStartOrResume} className="btn btn-resume">Resume</button>
+                        <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
+                      </div>
                     </>
                   )}
                 </div>

@@ -140,8 +140,19 @@
 
 .button-group {
   display: flex;
+  flex-direction: column;
   gap: 15px;
   margin-top: 10px;
+  align-items: center;
+}
+
+.button-group-horizontal {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  margin-top: 10px;
+  justify-content: center;
+  align-items: center;
 }
 
 .transcript-box {
@@ -149,9 +160,12 @@
   padding: 15px;
   border-radius: 8px;
   margin-top: 20px;
-  min-height: 50px;
+  height: 120px;
+  max-height: 120px;
+  overflow-y: auto;
   color: var(--text-light);
   text-align: left;
+  border: 1px solid var(--border-color);
 }
 
 /* Keyframes for Pulse Animation */
