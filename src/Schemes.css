@@ -1,0 +1,164 @@
+/* === Schemes Page Specific Styles === */
+
+.schemes-page .schemes-header {
+  color: var(--dark-gray);
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.schemes-page .schemes-description {
+  color: var(--text-light);
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+.schemes-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Specific button styles for the Schemes page */
+.btn-ask, .btn-listening {
+  /* A bit wider to fit text */
+}
+.schemes-controls .btn {
+  flex: 1; /* This makes each button take up an equal amount of space */
+  max-width: 220px; /* Optional: Prevents buttons from becoming excessively wide on large screens */
+}
+
+.btn-ask {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.btn-listening {
+  background-color: var(--warning-color);
+  color: var(--dark-gray);
+  animation: pulse-animation-orange 1.5s infinite; /* Re-using pulse but with orange */
+}
+
+/* You can reuse the main pulse animation, but a specific one is better for color changes */
+@keyframes pulse-animation-orange {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(255, 193, 7, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+  }
+}
+
+.transcript-box-schemes {
+  background-color: #f0f4f8; /* A light, neutral blue-gray */
+  height: 70px; /* Explicit height */
+  text-align: left;
+}
+
+.transcript-box-schemes .query-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 0.25rem;
+}
+
+.transcript-box-schemes .query-text {
+  font-size: 1.1rem;
+  color: var(--dark-gray);
+  font-style: italic;
+}
+
+/* Offline input styles to match homepage */
+.schemes-offline-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+  resize: vertical;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.schemes-offline-textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* === Result Card Styling === */
+
+.result-card {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border: 2px solid var(--success-color);
+  text-align: left;
+}
+
+.result-card .result-header {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--dark-gray);
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+}
+
+.result-card .result-meta {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  margin-bottom: 1rem;
+}
+
+.result-card .result-summary {
+  border-top: 1px solid var(--border-color);
+  padding-top: 1rem;
+}
+
+.result-card .summary-label {
+  font-weight: 600;
+  color: var(--dark-gray);
+}
+
+.result-card .summary-answer {
+  color: var(--success-color);
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.result-card .result-details {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: var(--light-gray);
+  border-radius: 8px;
+}
+
+.result-card .result-details summary {
+  font-weight: 600;
+  color: var(--primary-color);
+  cursor: pointer;
+}
+
+.result-card .details-content {
+  margin-top: 0.75rem;
+  color: #555;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* === No Match Card Styling === */
+
+.no-match-card {
+  background-color: #fffbe6;
+  padding: 1rem;
+  margin-top: 1.5rem;
+  border: 1px solid #ffe58f;
+  color: #8a6d3b;
+  font-weight: 600;
+  border-radius: var(--border-radius);
+}

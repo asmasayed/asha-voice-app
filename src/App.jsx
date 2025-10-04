@@ -285,6 +285,301 @@ function App() {
     const newTranscript = transcribedText.slice(0, cursorPosition) + ' ' + transcribedText.slice(cursorPosition);
     setTranscribedText(newTranscript);
   };
+  const handleStartSchemeSearch = () => {
+  if (recordingStatus === 'listening_scheme') return;
+
+  accumulatedTranscriptRef.current = '';
+  setSchemeQuery(''); // Clear previous query
+  setSchemeResult(null); // Clear previous result
+
+  recognitionRef.current = setupRecognition();
+  if (recognitionRef.current) {
+    recognitionRef.current.onresult = (event) => {
+      // This is a simplified handler for live feedback
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        transcript += event.results[i][0].transcript;
+      }
+      setSchemeQuery(transcript);
+    };
+
+    recognitionRef.current.onend = () => {
+      // Automatically trigger the search when the user stops talking
+      handleStopSchemeSearch(schemeQuery); 
+    };
+
+    recognitionRef.current.start();
+    setRecordingStatus('listening_scheme');
+  }
+};
+
+const handleStopSchemeSearch = (query) => {
+  if (recognitionRef.current) {
+    recognitionRef.current.stop();
+  }
+  setRecordingStatus('idle');
+
+  // Use the final query from state, or the direct argument if available
+  const finalQuery = query || schemeQuery;
+  if (finalQuery.trim()) {
+    const result = findBestSchemeMatch(finalQuery); // Assuming this function is available or imported in App.jsx
+    setSchemeResult(result);
+  }
+};
+
+const findBestSchemeMatch = (query) => {
+    if (!query) return null;
+
+    const normalizedQuery = normalizeText(query);
+    const queryWords = normalizedQuery.split(/\s+/).filter(word => word.length > 1);
+
+    let bestMatch = null;
+    let maxScore = 0;
+
+    // High-priority keyword patterns that should override other matches
+    const highPriorityPatterns = [
+        { pattern: /आशा.*बीमा.*5.*लाख|आशा.*5.*लाख.*बीमा|आशा.*वर्कर्स.*5.*लाख|आशा.*कर्मियों.*5.*लाख/, schemeId: 'A4', score: 100 },
+        { pattern: /आशा.*बीमा.*2.*लाख|आशा.*2.*लाख.*बीमा|आशा.*पेंशन|आशा.*रिटायर|रिटायर.*आशा|पेंशन.*आशा/, schemeId: 'A3', score: 90 },
+        { pattern: /टीबी.*5.*लाख|टीबी.*5000|तपेदिक.*5.*लाख/, schemeId: 'D1', score: 80 },
+        { pattern: /पीएमएमवीवाई|pmmvy.*5000|5000.*पीएमएमवीवाई|पाँच.*हजार.*रुपए|5000.*रुपए|पाँच.*हजार.*बेनिफिट|5000.*बेनिफिट|माँ.*बनने.*सहायता|माँ.*बनने.*पैसा|मातृत्व.*सहायता|मातृत्व.*पैसा/, schemeId: 'M2', score: 80 },
+        { pattern: /जेएसवाई|jsy.*1400|1400.*जेएसवाई|संस्थागत.*प्रसव|डिलीवरी.*पैसा|प्रसव.*सहायता/, schemeId: 'M1', score: 75 },
+        // Child malnutrition patterns (HIGHEST PRIORITY - urgent referral needed)
+        { pattern: /बच्चा.*कमजोर|शिशु.*कमजोर|बच्चा.*कुपोषित|शिशु.*कुपोषित|बच्चा.*वजन.*कम|शिशु.*वजन.*कम|कमजोर.*बच्चा|कुपोषित.*बच्चा|बच्चा.*वीक|शिशु.*वीक|वीक.*बच्चा|वीक.*शिशु|पोषण.*पुर्नवास|पोषण.*पुनर्वास|एनआरसी|nrc|पोषण.*केंद्र/, schemeId: 'C4', score: 95 },
+        // Child health checkup patterns (lower priority - general screening)
+        { pattern: /बच्चा.*जांच.*कहाँ|बच्चा.*चेकअप.*कहाँ|शिशु.*जांच.*कहाँ|बच्चे.*की.*जांच/, schemeId: 'C3', score: 85 },
+        { pattern: /बच्चा.*दस्त|बच्चा.*डायरिया|शिशु.*दस्त/, schemeId: 'C5', score: 85 },
+        { pattern: /बच्चा.*टीका|बच्चा.*वैक्सीन|शिशु.*टीका/, schemeId: 'I1', score: 85 },
+        // Newborn care patterns (HBNC - first 42 days)
+        { pattern: /जन्म.*बाद.*देखभाल|जन्म.*बाद.*बच्चे|नवजात.*देखभाल|42.*दिन|जन्म.*के.*बाद/, schemeId: 'C1', score: 88 },
+        // Family planning sterilization patterns
+        { pattern: /दो.*बच्चों.*बाद.*नसबंदी|नसबंदी.*पैसा|स्थायी.*साधन.*पैसा|बंध्याकरण.*पैसा/, schemeId: 'F2', score: 88 },
+        // ANC registration timing patterns
+        { pattern: /प्रेग्नेंट.*रजिस्ट्रेशन|गर्भवती.*पंजीकरण|रजिस्ट्रेशन.*कब|पंजीकरण.*कब|12.*सप्ताह|3.*महीने.*पंजीकरण/, schemeId: 'M4', score: 88 },
+    ];
+
+    // Check high-priority patterns first
+    for (const { pattern, schemeId, score } of highPriorityPatterns) {
+        if (pattern.test(normalizedQuery)) {
+            const matchingScheme = schemeData.find(scheme => scheme.Scheme_ID === schemeId);
+            if (matchingScheme) {
+                return matchingScheme;
+            }
+        }
+    }
+
+    // Create keyword variations for better matching
+    const createKeywordVariations = (word) => {
+        const variations = [word];
+        
+        // Add common Hindi variations
+        const hindiVariations = {
+            'पैसा': ['रुपया', 'रुपये', 'मनी', 'धन', 'राशि', 'बेनिफिट', 'लाभ', 'सहायता'],
+            'मिलता': ['मिलता है', 'मिलती है', 'मिलते हैं', 'दिया जाता', 'दी जाती'],
+            'कितना': ['कितनी', 'कितने', 'कितनों', 'कितना पैसा', 'कितनी राशि'],
+            'योजना': ['स्कीम', 'प्रोग्राम', 'कार्यक्रम', 'अभियान'],
+            'महिला': ['स्त्री', 'औरत', 'नारी', 'महिलाओं'],
+            'माँ': ['माता', 'मदर', 'मातृत्व', 'माँ बनना'],
+            'बच्चा': ['शिशु', 'बेबी', 'बच्चे', 'बच्चों', 'बालक'],
+            'गर्भवती': ['प्रेगनेंट', 'गर्भावस्था', 'गर्भवती महिला'],
+            'टीबी': ['तपेदिक', 'क्षय रोग', 'ट्यूबरकुलोसिस'],
+            'एचआईवी': ['एड्स', 'एचआईवी एड्स', 'एचआईवी संक्रमण'],
+            'मधुमेह': ['डायबिटीज', 'शुगर', 'मधुमेह रोग'],
+            'उच्च रक्तचाप': ['हाई ब्लड प्रेशर', 'बीपी', 'रक्तचाप'],
+            'एनीमिया': ['खून की कमी', 'रक्ताल्पता', 'हीमोग्लोबिन की कमी'],
+            'आशा': ['आशा वर्कर', 'आशा कर्मी', 'आशा सहायिका', 'आशा कार्यकर्ता'],
+            'पेंशन': ['रिटायरमेंट', 'रिटायर', 'सेवानिवृत्ति', 'पेंशन स्कीम'],
+            'बीमा': ['इंश्योरेंस', 'कवर', 'सुरक्षा', 'बीमा कवर'],
+            'लाख': ['500000', '5 लाख', 'पांच लाख', '500,000'],
+            '5000': ['पाँच हजार', 'पांच हजार', '5000', 'पाँच हज़ार', 'पांच हज़ार'],
+            'जांच': ['चेकअप', 'स्क्रीनिंग', 'टेस्ट', 'परीक्षा', 'मेडिकल चेकअप', 'स्वास्थ्य जांच'],
+            'रेफर': ['भेजना', 'ले जाना', 'रिफरल', 'ट्रांसफर'],
+            'दवा': ['दवाई', 'गोली', 'मेडिसिन', 'औषधि'],
+            'टीका': ['वैक्सीन', 'इंजेक्शन', 'टिकाकरण', 'बूंद'],
+            'कमजोर': ['कमजोरी', 'दुर्बल', 'कमजोर बच्चा', 'कमजोर शिशु', 'कुपोषित', 'कुपोषण', 'वजन कम', 'पतला', 'दुबला', 'वीक', 'वीक बच्चा', 'वीक शिशु'],
+            'पोषण': ['पोषण पुर्नवास', 'पोषण पुनर्वास', 'पोषण केंद्र', 'एनआरसी', 'NRC', 'पोषण पुनर्वास केंद्र'],
+            'कहाँ': ['कहां', 'कहा', 'कहा जाए', 'कहां जाना है'],
+            'साल': ['वर्ष', 'उम्र', 'आयु', 'साल का', 'साल की', 'साल के'],
+            'जन्म': ['जनम', 'बर्थ', 'डिलीवरी', 'प्रसव'],
+            'देखभाल': ['केयर', 'सेवा', 'देखरेख', 'संभाल'],
+            'नसबंदी': ['बंध्याकरण', 'स्थायी साधन', 'स्टेरिलाइजेशन'],
+            'पोषण': ['न्यूट्रिशन', 'पोषण दिवस', 'पोषण कार्यक्रम'],
+            'गांव': ['विलेज', 'ग्राम', 'ग्रामीण'],
+            'रजिस्ट्रेशन': ['पंजीकरण', 'रजिस्टर', 'रजिस्ट्रेशन', 'पंजीकरण करना'],
+            'सप्ताह': ['वीक', 'सप्ताह', 'हफ्ता', 'हफ्ते']
+        };
+        
+        if (hindiVariations[word]) {
+            variations.push(...hindiVariations[word]);
+        }
+        
+        return variations;
+    };
+
+    schemeData.forEach(scheme => {
+        let currentScore = 0;
+        
+        // Combine all search fields into one searchable pool
+        const searchPool = [
+            scheme.Keywords_Vernacular,
+            scheme.Scheme_Name_Vernacular,
+            scheme.Target_Group,
+            scheme.Age_Criteria,
+            scheme.Scheme_ID
+        ].join(' ').toLowerCase();
+
+        // Score by direct word presence and variations
+        queryWords.forEach(qWord => {
+            const variations = createKeywordVariations(qWord);
+            variations.forEach(variation => {
+                if (searchPool.includes(variation.toLowerCase())) {
+                    currentScore += 1;
+                }
+            });
+        });
+        
+        // Score boost for direct IDs/acronyms (e.g., 'JSY', 'PMMVY')
+        if (searchPool.includes(normalizedQuery)) {
+             currentScore += 5; 
+        } else if (normalizedQuery.length > 2 && searchPool.includes(normalizedQuery.substring(0, 3))) {
+             currentScore += 3; // Partial acronym match boost
+        }
+
+        // Boost score for exact phrase matches
+        const exactPhrases = [
+            'कितना पैसा मिलता',
+            'कितनी राशि मिलती',
+            'कैसे करें',
+            'कैसे मिलेगा',
+            'कहाँ जाना है',
+            'कौन सी योजना',
+            'कब तक मिलेगा',
+            'आशा का बीमा',
+            'आशा वर्कर्स का बीमा',
+            '5 लाख का बीमा',
+            'आशा पेंशन',
+            'आशा रिटायर',
+            'रिटायर आशा',
+            'पेंशन आशा',
+            'पाँच हजार रुपए',
+            '5000 रुपए',
+            'पाँच हजार बेनिफिट',
+            '5000 बेनिफिट',
+            'बच्चा कमजोर है',
+            'शिशु कमजोर है',
+            'बच्चा कुपोषित है',
+            'शिशु कुपोषित है',
+            'बच्चा वीक है',
+            'शिशु वीक है',
+            'कमजोर बच्चा',
+            'कुपोषित बच्चा',
+            'वीक बच्चा',
+            'बच्चा वजन कम',
+            'शिशु वजन कम',
+            'पोषण पुर्नवास',
+            'पोषण पुनर्वास',
+            'एनआरसी',
+            'पोषण केंद्र',
+            'बच्चा जांच कहाँ',
+            'शिशु जांच कहाँ',
+            'बच्चे की जांच',
+            'बच्चा बीमार है',
+            'शिशु बीमार है',
+            'जन्म के बाद देखभाल',
+            'नवजात देखभाल',
+            '42 दिन तक',
+            'दो बच्चों के बाद नसबंदी',
+            'नसबंदी का पैसा',
+            'स्थायी साधन पैसा',
+            'गांव में पोषण दिवस',
+            'पोषण दिवस गांव',
+            'गांव स्वास्थ्य दिवस',
+            'माँ बनने पर सहायता',
+            'माँ बनने पर पैसा',
+            'मातृत्व सहायता',
+            'मातृत्व पैसा',
+            'सरकारी सहायता माँ',
+            'प्रेग्नेंट रजिस्ट्रेशन',
+            'गर्भवती पंजीकरण',
+            'रजिस्ट्रेशन कब',
+            'पंजीकरण कब',
+            '12 सप्ताह',
+            '3 महीने पंजीकरण'
+        ];
+        
+        exactPhrases.forEach(phrase => {
+            if (normalizedQuery.includes(phrase) && searchPool.includes(phrase)) {
+                currentScore += 2;
+            }
+        });
+
+        // Special boost for ASHA-related queries
+        if (normalizedQuery.includes('आशा') && searchPool.includes('आशा')) {
+            currentScore += 3;
+        }
+
+        // Special boost for ASHA pension queries
+        if ((normalizedQuery.includes('आशा') && normalizedQuery.includes('पेंशन')) || 
+            (normalizedQuery.includes('आशा') && normalizedQuery.includes('रिटायर'))) {
+            currentScore += 4;
+        }
+
+        // Special boost for PMMVY-related queries (₹5000 benefit)
+        if ((normalizedQuery.includes('5000') || normalizedQuery.includes('पाँच हजार') || normalizedQuery.includes('पांच हजार')) && 
+            (normalizedQuery.includes('रुपए') || normalizedQuery.includes('बेनिफिट') || normalizedQuery.includes('लाभ'))) {
+            currentScore += 4;
+        }
+
+        // Special boost for child health checkup queries
+        if ((normalizedQuery.includes('बच्चा') || normalizedQuery.includes('शिशु')) && 
+            (normalizedQuery.includes('जांच') || normalizedQuery.includes('चेकअप')) &&
+            searchPool.includes('जांच')) {
+            currentScore += 4;
+        }
+
+        // Special boost for malnutrition/weak child queries (HIGHEST PRIORITY)
+        if ((normalizedQuery.includes('कमजोर') || normalizedQuery.includes('कुपोषित') || normalizedQuery.includes('वजन कम') || normalizedQuery.includes('वीक') || normalizedQuery.includes('पोषण पुर्नवास') || normalizedQuery.includes('एनआरसी')) && 
+            (normalizedQuery.includes('बच्चा') || normalizedQuery.includes('शिशु'))) {
+            currentScore += 5; // Higher boost for malnutrition cases
+        }
+
+        // Special boost for newborn care queries (HBNC)
+        if ((normalizedQuery.includes('जन्म') || normalizedQuery.includes('नवजात')) && 
+            (normalizedQuery.includes('देखभाल') || normalizedQuery.includes('42'))) {
+            currentScore += 4;
+        }
+
+        // Special boost for sterilization queries (F2)
+        if ((normalizedQuery.includes('नसबंदी') || normalizedQuery.includes('स्थायी साधन')) && 
+            normalizedQuery.includes('पैसा')) {
+            currentScore += 4;
+        }
+
+        // Special boost for maternal assistance queries (PMMVY gets priority for general queries)
+        if ((normalizedQuery.includes('माँ') || normalizedQuery.includes('मातृत्व')) && 
+            (normalizedQuery.includes('सहायता') || normalizedQuery.includes('पैसा') || normalizedQuery.includes('बेनिफिट'))) {
+            // PMMVY gets higher boost for general motherhood queries
+            if (searchPool.includes('5000') || searchPool.includes('पाँच हजार')) {
+                currentScore += 5; // Higher boost for PMMVY
+            } else {
+                currentScore += 3; // Lower boost for JSY
+            }
+        }
+
+        // Special boost for registration timing queries (ANC M4)
+        if ((normalizedQuery.includes('रजिस्ट्रेशन') || normalizedQuery.includes('पंजीकरण')) && 
+            (normalizedQuery.includes('कब') || normalizedQuery.includes('12') || normalizedQuery.includes('3 महीने'))) {
+            currentScore += 4;
+        }
+
+        if (currentScore > maxScore) {
+            maxScore = currentScore;
+            bestMatch = scheme;
+        }
+    });
+
+    // Require at least 1 matching keyword for a confident answer
+    return maxScore >= 1 ? bestMatch : null;
+};
 
   const showToast = (message, type = 'success') => setToast({ message, type, show: true });
   const hideToast = () => setToast((prev) => ({ ...prev, show: false }));
@@ -380,8 +675,10 @@ function App() {
               recordingStatus={recordingStatus}
               setRecordingStatus={setRecordingStatus}
               isOnline={isOnline}
+              handleStartSchemeSearch={handleStartSchemeSearch}
+              handleStopSchemeSearch={handleStopSchemeSearch}
             />
-          )}
+)}
         </main>
       </div>
       <Navbar activePage={activePage} onNavigate={handleNavigate} />
