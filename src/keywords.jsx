@@ -2,8 +2,7 @@ const keywords = {
     // ========================================================================
     // ===== GLOBAL KEYWORDS (Always the same regardless of context) =====
     // ========================================================================
-    'नाम': { field: 'basicInfo.patientName', type: 'string' },
-    'नाम है': { field: 'basicInfo.patientName', type: 'string' },
+    'नाम|नाम है': { field: 'basicInfo.patientName', type: 'string' },
     'उम्र': { field: 'basicInfo.age', type: 'number' },
     'साल': { field: 'basicInfo.age', type: 'number', isSuffix: true },
     'साल का': { field: 'basicInfo.age', type: 'number', isSuffix: true },
