@@ -72,11 +72,14 @@ function parseHindiText(text, visitType = 'General') {
   console.log('Normalized text:', normalizedText);
 
   // 1. PATIENT NAME EXTRACTION
-  // Pattern: नाम [name] है/और/उम्र/पता/मोबाइल
+  // Pattern: नाम [name] है/और/उम्र/पता/मोबाइल - Enhanced for your example
   const namePatterns = [
+    // Enhanced pattern for your example: "मेरा नाम Danish है"
+    /(?:मेरा|मेरे|मेरी)\s+नाम\s+([\u0900-\u097F\s]+?)(?=\s+है|\s+और|\s+उम्र|\s+पता|\s+मोबाइल|\s+फोन|$)/i,
     /(?:नाम|नाम है|पेशेंट का नाम|रोगी का नाम)\s+([\u0900-\u097F\s]+?)(?=\s+है|\s+और|\s+उम्र|\s+पता|\s+मोबाइल|\s+फोन|$)/i,
     /([\u0900-\u097F]+)\s+(?:का|की)\s+नाम/i,
-    /(?:मेरा|मेरे|मेरी)\s+नाम\s+([\u0900-\u097F\s]+?)(?=\s+है|\s+और|\s+उम्र|$)/i
+    // Additional patterns for mixed language names
+    /(?:मेरा|मेरे|मेरी)\s+नाम\s+([a-zA-Z\s]+?)(?=\s+है|\s+और|\s+उम्र|$)/i
   ];
   
   for (const pattern of namePatterns) {
@@ -84,17 +87,19 @@ function parseHindiText(text, visitType = 'General') {
     if (match && match[1]) {
       const name = match[1].trim().replace(/\s+/g, ' ');
       // Filter out common Hindi words that might be captured
-      if (!['है', 'हैं', 'था', 'थी', 'थे', 'साल', 'उम्र', 'पता', 'मोबाइल'].includes(name)) {
+      if (!['है', 'हैं', 'था', 'थी', 'थे', 'साल', 'उम्र', 'पता', 'मोबाइल', 'फोन'].includes(name)) {
         data.basicInfo.patientName = name;
         console.log('Extracted name:', name);
-          break;
-        }
+        break;
+      }
     }
   }
 
   // 2. AGE EXTRACTION
-  // Pattern: उम्र/आयु [number] साल/वर्ष/की है
+  // Pattern: उम्र/आयु [number] साल/वर्ष/की है - Enhanced for your example
   const agePatterns = [
+    // Enhanced pattern for your example: "मेरी उम्र 20 साल है"
+    /(?:मेरी|मेरे)\s+उम्र\s*(\d+)(?:\s*(?:साल|वर्ष|की|है))?/i,
     /(?:उम्र|आयु)\s*(\d+)(?:\s*(?:साल|वर्ष|की|है))?/i,
     /(\d+)\s*(?:साल|वर्ष)(?:\s*(?:का|की|है))?/i,
     /(?:साल|वर्ष)\s*(\d+)/i
@@ -107,28 +112,36 @@ function parseHindiText(text, visitType = 'General') {
       if (age >= 0 && age <= 120) {
         data.basicInfo.age = age.toString();
         console.log('Extracted age:', age);
-          break;
-        }
+        break;
       }
+    }
   }
 
   // 3. MOBILE NUMBER EXTRACTION
-  // Pattern: मोबाइल/फोन नंबर [10 digits]
+  // Pattern: मोबाइल/फोन नंबर [10-11 digits] - Enhanced for your example
   const mobilePatterns = [
-    /(?:मोबाइल|फोन)\s*(?:नंबर)?\s*(\d{10})/i,
-    /(?:संपर्क|कॉन्टैक्ट)\s*(?:नंबर)?\s*(\d{10})/i,
-    /(\d{10})/g // Fallback: any 10-digit number
+    // Hindi patterns - Enhanced for your example: "मेरा फ़ोन नंबर 11222323333 है"
+    /(?:मेरा|मेरे|मेरी)\s*(?:फोन|मोबाइल|फ़ोन)\s*(?:नंबर)?\s*(\d{10,11})/i,
+    /(?:फोन|मोबाइल|फ़ोन)\s*(?:नंबर)?\s*(\d{10,11})/i,
+    /(?:संपर्क|कॉन्टैक्ट)\s*(?:नंबर)?\s*(\d{10,11})/i,
+    // Fallback patterns
+    /(\d{10,11})/g // Fallback: any 10-11 digit number
   ];
   
   for (const pattern of mobilePatterns) {
     const match = normalizedText.match(pattern);
     if (match && match[1]) {
-      const mobile = match[1];
-      if (mobile.length === 10) {
+      let mobile = match[1];
+      // Handle 11-digit numbers (remove leading country code if present)
+      if (mobile.length === 11 && mobile.startsWith('1')) {
+        mobile = mobile.substring(1); // Remove leading '1' for Indian numbers
+      }
+      // Validate it's a proper 10-digit number
+      if (mobile.length === 10 && /^\d{10}$/.test(mobile)) {
         data.basicInfo.mobile = mobile;
         console.log('Extracted mobile:', mobile);
-          break;
-        }
+        break;
+      }
     }
   }
 
@@ -146,9 +159,9 @@ function parseHindiText(text, visitType = 'General') {
       if (address.length > 2) {
         data.basicInfo.address = address;
         console.log('Extracted address:', address);
-      break;
+        break;
+      }
     }
-  }
   }
 
   // 5. GENDER EXTRACTION
