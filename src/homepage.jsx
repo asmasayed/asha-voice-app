@@ -45,7 +45,9 @@ const HomePage = ({
   handleVisitTypeChange,
   onAddSpace,
   showToast,
-  isOnline
+  isOnline,
+  activeTab,
+  handleTabToggle 
 }) => {
   const InfoTab = ({ title, content, isActive, onClick }) => (
   <div className={`info-tab ${isActive ? 'active' : ''}`} onClick={onClick}>
@@ -53,7 +55,6 @@ const HomePage = ({
     {isActive && <div className="info-tab-content">{content}</div>}
   </div>
 );
- const [activeTab, setActiveTab] = useState('howTo');
   const [selectionToolbar, setSelectionToolbar] = useState({
         visible: false,
         top: 0,
@@ -223,19 +224,19 @@ const HomePage = ({
               title="How to Record"
               content={instructions.howTo}
               isActive={activeTab === 'howTo'}
-              onClick={() => setActiveTab('howTo')}
+              onClick={() => handleTabToggle('howTo')}
             />
             <InfoTab 
               title="Sample Input"
               content={instructions.sample}
               isActive={activeTab === 'sample'}
-              onClick={() => setActiveTab('sample')}
+              onClick={() => handleTabToggle('sample')}
             />
             <InfoTab 
               title="Offline Mode"
               content={instructions.offline}
               isActive={activeTab === 'offline'}
-              onClick={() => setActiveTab('offline')}
+              onClick={() => handleTabToggle('offline')}
             />
           </div>
         </div>

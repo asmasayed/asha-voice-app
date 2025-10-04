@@ -38,6 +38,7 @@ function App() {
   const transcriptBoxRef = useRef(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const [activeTab, setActiveTab] = useState('howTo');
   
 
   useEffect(() => {
@@ -110,6 +111,16 @@ function App() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isDropdownOpen]);
+
+  const handleTabToggle = (tabName) => {
+    // If the clicked tab is already the active one, close it.
+    if (activeTab === tabName) {
+      setActiveTab(null);
+    } else {
+      // Otherwise, open the clicked tab.
+      setActiveTab(tabName);
+    }
+  };
 
   const setupRecognition = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -344,6 +355,8 @@ function App() {
               onAddSpace={handleAddSpace}
               showToast={showToast}
               isOnline={isOnline}
+              activeTab={activeTab}
+              handleTabToggle={handleTabToggle}
             />
           )}
           {activePage === 'visits' && <VisitsLog visits={visits} onViewDetails={handleViewDetails} onDelete={handleDeleteVisit} user={currentUser} handleSync={handleSync} queue={queue} isOnline={isOnline}/>}
