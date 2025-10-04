@@ -369,7 +369,7 @@ const Schemes = ({
         }
     };
 
-    const buttonText = isListening ? '🔴 Listening...' : '🎤 Ask Scheme Question';
+    const buttonText = isListening ? 'Listening...' : ' Ask Scheme Question';
     const buttonStyle = isListening 
         ? { backgroundColor: '#f39c12', color: 'white', animation: 'pulse-animation 1.5s infinite' } 
         : { backgroundColor: '#2ecc71', color: 'white' };

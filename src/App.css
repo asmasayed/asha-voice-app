@@ -595,4 +595,23 @@ input::placeholder, textarea::placeholder {
     gap: var(--space-3);
   }
 }
+.toast-message {
+  margin-right: var(--space-4);
+}
 
+/* ADD THIS RULE FOR THE CANCEL BUTTON */
+.toast-close-btn {
+  background: none;
+  border: none;
+  color: var(--white);
+  font-size: var(--font-size-xl); /* A good size for an 'x' icon */
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.8;
+  padding: var(--space-1);
+  transition: opacity var(--transition-normal);
+}
+
+.toast-close-btn:hover {
+  opacity: 1;
+}

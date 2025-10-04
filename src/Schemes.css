@@ -10,7 +10,6 @@
 
 /* === CLEAN PAGE HEADER === */
 .schemes-page h2 {
-  color: #2563eb;
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
   margin-bottom: var(--space-8);
@@ -22,9 +21,8 @@
 }
 
 .schemes-page h2::before {
-  content: '📚';
   font-size: var(--font-size-4xl);
-  color: #3b82f6;
+  color: #000000;
 }
 
 /* === CLEAN PAGE DESCRIPTION === */
