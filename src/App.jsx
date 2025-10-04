@@ -16,7 +16,6 @@ import { collection, addDoc, serverTimestamp, query, onSnapshot, doc, deleteDoc,
 import VisitDetailModal from './VisitDetailModal';
 import ProfileDropdown from './ProfileDropdown';
 import './ProfileDropdown.css'
-import './HomePage.css'
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -319,28 +318,19 @@ function App() {
   return (
     <>
       <div className="container">
-        <header className="app-header">
-      {/* --- Left side with Logo and Title --- */}
-      <div className="header-left">
-        <img src="/logo.png" alt="App Logo" className="app-logo" />
-        <div className="header-title-block">
-          <h1 className="app-title">आशा सहायक</h1>
-          {/* This now displays the user's name with fallbacks */}
-          <p className="welcome-message">
-            Welcome, {currentUser.name || currentUser.displayName || 'ASHA'}
-          </p>
-        </div>
+        <header>
+          <div className="welcome-header">
+        <h2>Welcome, ASHA Worker!</h2>
+        <p>Ready to log a new patient visit?</p>
       </div>
-
-      {/* --- Right side with Profile Dropdown --- */}
-      <ProfileDropdown
-        user={currentUser}
-        onLogout={handleLogout}
-        isOpen={isDropdownOpen}
-        onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
-        dropdownRef={dropdownRef}
-      />
-    </header>
+          <ProfileDropdown
+            user={currentUser}
+            onLogout={handleLogout}
+            isOpen={isDropdownOpen}
+            onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
+            dropdownRef={dropdownRef}
+          />
+        </header>
         {toast.show && (
           <Toast message={toast.message} type={toast.type} onClose={hideToast} />
         )}
@@ -371,18 +361,13 @@ function App() {
           )}
           {activePage === 'visits' && <VisitsLog visits={visits} onViewDetails={handleViewDetails} onDelete={handleDeleteVisit} user={currentUser} handleSync={handleSync} queue={queue} isOnline={isOnline}/>}
           {activePage === 'schemes' && (
-  <Schemes
-    schemeQuery={schemeQuery}
-    setSchemeQuery={setSchemeQuery}
-    schemeResult={schemeResult}
-    setSchemeResult={setSchemeResult}
-    // --- ADD THESE PROPS ---
-    handleStartOrResume={handleStartOrResume}
-    handleStop={handleStop}
-    recordingStatus={recordingStatus}
-    transcribedText={transcribedText}
-  />
-)}
+            <Schemes 
+              schemeQuery={schemeQuery}
+              setSchemeQuery={setSchemeQuery}
+              schemeResult={schemeResult}
+              setSchemeResult={setSchemeResult}
+            />
+          )}
         </main>
       </div>
       <Navbar activePage={activePage} onNavigate={handleNavigate} />
