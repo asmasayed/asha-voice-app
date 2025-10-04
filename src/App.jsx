@@ -38,9 +38,20 @@ function App() {
   const transcriptBoxRef = useRef(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  
 
   useEffect(() => {
     let unsubscribeFromVisits = () => {};
+
+    if (!isOnline && auth.currentUser) {
+      // If we are offline but Firebase already knows who the user is from a previous session,
+      // we can proceed immediately.
+      setCurrentUser(auth.currentUser);
+      setIsLoading(false);
+      // We don't try to fetch visits, as we know we are offline.
+      return;
+    }
+
     const unsubscribeFromAuth = onAuthStateChanged(auth, async(user) => {
       setCurrentUser(user);
       if (user) {
@@ -78,11 +89,11 @@ function App() {
       unsubscribeFromAuth();
       unsubscribeFromVisits();
     };
-  }, []);
+  }, [isOnline]);
 
   useEffect(() => {
   setIsDropdownOpen(false);
-  }, [currentUser]);
+  }, []);
 
   useEffect(()=>{
     function handleClickOutside(event) {
@@ -297,10 +308,10 @@ function App() {
     <>
       <div className="container">
         <header>
-          <div className="header-content">
-            <h1>आशा सहायक</h1>
-            <p>ASHA Voice Assistant</p>
-          </div>
+          <div className="welcome-header">
+        <h2>Welcome, ASHA Worker!</h2>
+        <p>Ready to log a new patient visit?</p>
+      </div>
           <ProfileDropdown
             user={currentUser}
             onLogout={handleLogout}

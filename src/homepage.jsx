@@ -1,5 +1,6 @@
 import { useState} from  'react';
 import './App.css'
+import './HomePage.css';
 
 // A reusable component for displaying and editing a single field.
 // It's kept here because it is only used by the HomePage.
@@ -46,12 +47,41 @@ const HomePage = ({
   showToast,
   isOnline
 }) => {
+  const InfoTab = ({ title, content, isActive, onClick }) => (
+  <div className={`info-tab ${isActive ? 'active' : ''}`} onClick={onClick}>
+    <h3 className="info-tab-title">{title}</h3>
+    {isActive && <div className="info-tab-content">{content}</div>}
+  </div>
+);
+ const [activeTab, setActiveTab] = useState('howTo');
   const [selectionToolbar, setSelectionToolbar] = useState({
         visible: false,
         top: 0,
         left: 0,
     });
   const [manualText, setManualText] = useState('');
+
+    const instructions = {
+    howTo: (
+      <ol>
+        <li>Press the microphone button to start recording.</li>
+        <li>Speak the patient's details clearly.</li>
+        <li>Press "Pause" or "Stop & Finish" when done.</li>
+        <li>Once Paused, you can correct the Text by adding spaces.</li>
+        <li>After Recording, Correct any errors on the confirmation screen.</li>
+      </ol>
+    ),
+    sample: (
+      <blockquote>
+        "रोगी का नाम शीला है, उम्र 40 साल, उनको बुखार और खांसी है। दवाई में पैरासिटामोल दिया है। अगला फॉलो-अप अगले हफ्ते होगा।"
+      </blockquote>
+    ),
+    offline: (
+      <p>
+        When you are offline, the microphone will be replaced with a text box. Type the visit details and press "Parse Text" to proceed.
+      </p>
+    )
+  };
 
     // Helper to hide the toolbar
     const hideToolbar = () => {
@@ -185,9 +215,31 @@ const HomePage = ({
         </div>
       ) : (
         <div className="card recording-view">
-            {isOnline ? (
-              <>
-                <div className="button-group">
+              {isOnline ? (
+                <>
+                  <div className="instructions-panel card">
+          <div className="info-tabs-container">
+            <InfoTab 
+              title="How to Record"
+              content={instructions.howTo}
+              isActive={activeTab === 'howTo'}
+              onClick={() => setActiveTab('howTo')}
+            />
+            <InfoTab 
+              title="Sample Input"
+              content={instructions.sample}
+              isActive={activeTab === 'sample'}
+              onClick={() => setActiveTab('sample')}
+            />
+            <InfoTab 
+              title="Offline Mode"
+              content={instructions.offline}
+              isActive={activeTab === 'offline'}
+              onClick={() => setActiveTab('offline')}
+            />
+          </div>
+        </div>
+                  <div className="button-group">
                     {recordingStatus === 'idle' && (
                     <div className="mic-wrapper">
                         <div onClick={handleStartOrResume} className="mic-button">
