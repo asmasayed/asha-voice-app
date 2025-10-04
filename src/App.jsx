@@ -16,6 +16,7 @@ import { collection, addDoc, serverTimestamp, query, onSnapshot, doc, deleteDoc,
 import VisitDetailModal from './VisitDetailModal';
 import ProfileDropdown from './ProfileDropdown';
 import './ProfileDropdown.css'
+import './HomePage.css'
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -318,19 +319,27 @@ function App() {
   return (
     <>
       <div className="container">
-        <header>
-          <div className="welcome-header">
-        <h2>Welcome, ASHA Worker!</h2>
-        <p>Ready to log a new patient visit?</p>
+        <header className="app-header">
+      {/* --- Left side with Logo and Title --- */}
+      <div className="header-left">
+      <img src="/logo.jpg" alt="ASHA Voice Assistant Logo" className="header-logo" />
+      <div className="header-title-group">
+        <h1 className="app-name">ASHA Voice Assistant</h1>
+        <p className="welcome-message">
+          Welcome, {currentUser?.displayName || 'User'}!
+        </p>
       </div>
-          <ProfileDropdown
-            user={currentUser}
-            onLogout={handleLogout}
-            isOpen={isDropdownOpen}
-            onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
-            dropdownRef={dropdownRef}
-          />
-        </header>
+    </div>
+
+      {/* --- Right side with Profile Dropdown --- */}
+      <ProfileDropdown
+        user={currentUser}
+        onLogout={handleLogout}
+        isOpen={isDropdownOpen}
+        onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
+        dropdownRef={dropdownRef}
+      />
+    </header>
         {toast.show && (
           <Toast message={toast.message} type={toast.type} onClose={hideToast} />
         )}

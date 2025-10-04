@@ -34,30 +34,21 @@ body {
   max-width: 900px;
 }
 
-header {
-  margin-bottom: 2rem;
-}
-
-header h1 {
-  font-size: 2rem;
-  color: var(--dark-gray);
-  margin-bottom: 0.25rem;
-}
-
-header p {
-  font-size: 1rem;
-  color: #6c757d;
-  margin-top: 0;
-}
-
 /* --- Main Header Styling --- */
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #dee2e6; /* Subtle separator */
-  margin-bottom: 2rem;
+  position: sticky;
+  top: 0;
+  background-color: var(--light-gray); /* Or #ffffff for pure white */
+  z-index: 100;
+
+  /* Adjust padding and margin as the container is now different */
+  padding: 0.75rem 1rem;
+  margin: 0; /* The sticky header is outside the main container flow */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .welcome-header {
@@ -727,3 +718,29 @@ header {
     -moz-user-select: text;
     -ms-user-select: text;
   }
+
+  main.container {
+    padding-top: 2rem;
+}
+.header-logo {
+  height: 45px;
+  width: 45px;
+}
+
+.header-title-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-name {
+  font-size: 1.1rem; /* Main title size */
+  font-weight: 600;
+  color: var(--dark-gray);
+  margin: 0;
+}
+
+.welcome-message {
+  font-size: 0.85rem; /* Smaller sub-text */
+  color: var(--text-light);
+  margin: 0;
+}
