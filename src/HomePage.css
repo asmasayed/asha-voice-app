@@ -137,26 +137,6 @@
 .mic-button.paused {
   background-color: #ffc107; /* Yellow */
 }
-.mic-icon {
-  /* Using a CSS icon for the microphone */
-  display: block;
-  width: 10px;
-  height: 20px;
-  background: white;
-  border-radius: 5px;
-}
-.mic-icon::before {
-  content: '';
-  position: absolute;
-  top: 25%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 20px;
-  height: 20px;
-  border: 5px solid white;
-  border-radius: 50%;
-  border-top-color: transparent;
-}
 
 .button-group {
   display: flex;

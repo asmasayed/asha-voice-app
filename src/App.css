@@ -529,11 +529,52 @@ input::placeholder, textarea::placeholder {
   to { transform: rotate(360deg); }
 }
 
-/* === UTILITIES === */
+/* === UTILITIES & COMPONENT-SPECIFIC STYLES === */
+
 .not-found {
   color: var(--text-muted);
   font-style: italic;
 }
+
+/* Style for the "Not Synced" tag in VisitsLog.jsx */
+.local-tag {
+  background-color: var(--warning-light);
+  color: var(--warning-hover);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  margin-left: var(--space-2);
+  border: 1px solid var(--warning-color);
+}
+
+/* Style for the "Add Space" button in HomePage.jsx */
+.selection-toolbar {
+  position: absolute;
+  transform: translateX(-50%);
+  background-color: var(--text-dark);
+  color: var(--white);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-dropdown);
+}
+
+.selection-toolbar button {
+  background: none;
+  border: none;
+  color: var(--white);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.selection-toolbar button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 
 /* === RESPONSIVE STYLES === */
 @media (max-width: 768px) {
@@ -554,3 +595,4 @@ input::placeholder, textarea::placeholder {
     gap: var(--space-3);
   }
 }
+
