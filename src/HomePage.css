@@ -109,6 +109,12 @@
   transition: all 0.3s ease;
   position: relative;
 }
+.mic-wrapper .mic-button img,
+.recording-controls .mic-button img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain; /* Ensures the image scales nicely */
+}
 .mic-button.idle {
   background-color: var(--primary-color);
   box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.4);
