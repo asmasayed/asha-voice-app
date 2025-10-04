@@ -375,6 +375,11 @@ function App() {
               setSchemeQuery={setSchemeQuery}
               schemeResult={schemeResult}
               setSchemeResult={setSchemeResult}
+              recognitionRef={recognitionRef}
+              accumulatedTranscriptRef={accumulatedTranscriptRef}
+              recordingStatus={recordingStatus}
+              setRecordingStatus={setRecordingStatus}
+              isOnline={isOnline}
             />
           )}
         </main>
