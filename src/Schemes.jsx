@@ -1,6 +1,6 @@
 // src/Schemes.jsx
 
-import React from 'react';
+import React, { useState } from 'react';
 import schemeData from './schemes.json'; // 🚨 Imports your 30-entry database
 import './Schemes.css'; // Import the beautiful CSS styles
 
@@ -14,14 +14,13 @@ const normalizeText = (text) => {
                .trim();
 };
 
-const findBestSchemeMatch = (query) => {
-    if (!query) return null;
+const findMultipleSchemeMatches = (query) => {
+    if (!query) return [];
 
     const normalizedQuery = normalizeText(query);
     const queryWords = normalizedQuery.split(/\s+/).filter(word => word.length > 1);
 
-    let bestMatch = null;
-    let maxScore = 0;
+    const schemeMatches = [];
 
     // High-priority keyword patterns that should override other matches
     const highPriorityPatterns = [
@@ -49,10 +48,53 @@ const findBestSchemeMatch = (query) => {
         if (pattern.test(normalizedQuery)) {
             const matchingScheme = schemeData.find(scheme => scheme.Scheme_ID === schemeId);
             if (matchingScheme) {
-                return matchingScheme;
+                schemeMatches.push({ scheme: matchingScheme, score: score });
             }
         }
     }
+
+    // Enhanced filtering for maternal queries to exclude irrelevant disease protocols
+    const isMaternalQuery = normalizedQuery.includes('प्रेग्नेंट') || 
+                           normalizedQuery.includes('गर्भवती') || 
+                           normalizedQuery.includes('मातृत्व') ||
+                           normalizedQuery.includes('pregnant') ||
+                           normalizedQuery.includes('maternal');
+    
+    const isChildQuery = normalizedQuery.includes('बच्चे') || 
+                        normalizedQuery.includes('शिशु') || 
+                        normalizedQuery.includes('बच्चा') ||
+                        normalizedQuery.includes('child') ||
+                        normalizedQuery.includes('baby');
+    
+    const isImmunizationQuery = normalizedQuery.includes('टीके') || 
+                               normalizedQuery.includes('टीका') || 
+                               normalizedQuery.includes('वैक्सीन') ||
+                               normalizedQuery.includes('immunization') ||
+                               normalizedQuery.includes('vaccine') ||
+                               normalizedQuery.includes('vaccination');
+    
+    // Enhanced filtering to show only truly relevant schemes
+    const shouldExcludeScheme = (scheme) => {
+        if (isMaternalQuery) {
+            // Exclude general disease protocols for maternal queries
+            const generalDiseaseProtocols = ['D2', 'D3', 'D4', 'D5']; // Malaria, Dengue, Leprosy, NCD
+            return generalDiseaseProtocols.includes(scheme.Scheme_ID);
+        }
+        
+        if (isChildQuery) {
+            // Exclude adult-specific schemes for child queries
+            const adultSchemes = ['D5', 'F1', 'F2', 'F3', 'F4', 'F5']; // NCD, Family Planning
+            return adultSchemes.includes(scheme.Scheme_ID);
+        }
+        
+        if (isImmunizationQuery) {
+            // For immunization queries, only show immunization-related schemes
+            const immunizationSchemes = ['I1', 'I2', 'I3', 'I4']; // Immunization schemes only
+            return !immunizationSchemes.includes(scheme.Scheme_ID);
+        }
+        
+        return false;
+    };
 
     // Create keyword variations for better matching
     const createKeywordVariations = (word) => {
@@ -258,14 +300,22 @@ const findBestSchemeMatch = (query) => {
             currentScore += 4;
         }
 
-        if (currentScore > maxScore) {
-            maxScore = currentScore;
-            bestMatch = scheme;
+        // Add scheme to matches if it has a score of at least 1 and passes filtering
+        if (currentScore >= 1 && !shouldExcludeScheme(scheme)) {
+            schemeMatches.push({ scheme: scheme, score: currentScore });
         }
     });
 
-    // Require at least 1 matching keyword for a confident answer
-    return maxScore >= 1 ? bestMatch : null;
+    // Sort matches by score (highest first) and return only relevant matches (max 5)
+    const sortedMatches = schemeMatches
+        .sort((a, b) => b.score - a.score);
+    
+    // Only return schemes with meaningful scores (at least 2 points for relevance)
+    // Show at most 5 schemes, but only if they are relevant
+    return sortedMatches
+        .filter(match => match.score >= 2)
+        .slice(0, 5)
+        .map(match => match.scheme);
 };
 
 // === 2. SCHEMES COMPONENT (UI and Voice Control) ===
@@ -283,7 +333,29 @@ const Schemes = ({
 }) => {
     
     // Status flag specifically for scheme listening
-    const isListening = recordingStatus === 'listening_scheme'; 
+    const isListening = recordingStatus === 'listening_scheme';
+    
+    // Search functionality for schemes
+    const [searchTerm, setSearchTerm] = useState('');
+    
+    // Determine search scope: use voice results if available, otherwise use all schemes
+    const searchScope = schemeResult && schemeResult.length > 0 ? schemeResult : schemeData;
+    
+    // Filter schemes based on search term within the search scope
+    const filteredSchemes = searchTerm.trim() 
+        ? searchScope.filter(scheme => {
+            const searchFields = [
+                scheme.Scheme_Name_Vernacular,
+                scheme.Keywords_Vernacular,
+                scheme.Target_Group,
+                scheme.Age_Criteria,
+                scheme.Scheme_ID,
+                scheme.Summary_Answer_Vernacular
+            ].join(' ').toLowerCase();
+            
+            return searchFields.includes(searchTerm.toLowerCase());
+        })
+        : []; 
 
     const handleStartSchemeSearch = () => {
         if (recognitionRef.current) {
@@ -298,6 +370,7 @@ const Schemes = ({
         
         setSchemeResult(null); 
         setSchemeQuery('');
+        setSearchTerm(''); // Clear search when starting new voice query
         accumulatedTranscriptRef.current = '';
 
         recognition.lang = 'hi-IN';
@@ -354,12 +427,14 @@ const Schemes = ({
         setSchemeQuery(finalTranscript);
 
         if (finalTranscript.length > 0) {
-            const match = findBestSchemeMatch(finalTranscript); // Perform offline NLU search
-            setSchemeResult(match);
+            const matches = findMultipleSchemeMatches(finalTranscript); // Perform offline NLU search
+            setSchemeResult(matches);
 
-            // Text-to-Speech (TTS) for the answer
-            if (match && 'speechSynthesis' in window) {
-                const answer = match.Summary_Answer_Vernacular;
+            // Text-to-Speech (TTS) for the answer - announce first match
+            if (matches && matches.length > 0 && 'speechSynthesis' in window) {
+                const answer = matches.length === 1 
+                    ? matches[0].Summary_Answer_Vernacular
+                    : `मुझे ${matches.length} योजनाएं मिली हैं। पहली योजना: ${matches[0].Summary_Answer_Vernacular}`;
                 const utterance = new SpeechSynthesisUtterance(answer);
                 utterance.lang = 'hi-IN'; // Ensure Hindi pronunciation
                 window.speechSynthesis.speak(utterance);
@@ -378,12 +453,14 @@ const Schemes = ({
     const handleOfflineTextSearch = (text) => {
         if (text.trim().length > 0) {
             setSchemeQuery(text);
-            const match = findBestSchemeMatch(text);
-            setSchemeResult(match);
+            const matches = findMultipleSchemeMatches(text);
+            setSchemeResult(matches);
             
-            // Text-to-Speech (TTS) for the answer
-            if (match && 'speechSynthesis' in window) {
-                const answer = match.Summary_Answer_Vernacular;
+            // Text-to-Speech (TTS) for the answer - announce first match
+            if (matches && matches.length > 0 && 'speechSynthesis' in window) {
+                const answer = matches.length === 1 
+                    ? matches[0].Summary_Answer_Vernacular
+                    : `मुझे ${matches.length} योजनाएं मिली हैं। पहली योजना: ${matches[0].Summary_Answer_Vernacular}`;
                 const utterance = new SpeechSynthesisUtterance(answer);
                 utterance.lang = 'hi-IN';
                 window.speechSynthesis.speak(utterance);
@@ -396,6 +473,62 @@ const Schemes = ({
     return (
         <div className="schemes-page">
             <h2>सरकारी योजना प्रश्नोत्तर (Schemes Q&A)</h2>
+            
+            {/* Search Bar for Schemes */}
+            <div className="search-bar-container">
+                <input
+                    type="text"
+                    className="search-input"
+                    placeholder={
+                        schemeResult && schemeResult.length > 0 
+                            ? `Search within ${schemeResult.length} voice results...`
+                            : "Search schemes by name, keywords, or ID..."
+                    }
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+            
+            {/* Display Search Results */}
+            {searchTerm.trim() && (
+                <div className="search-results-container">
+                    <h3>
+                        Search Results ({filteredSchemes.length} schemes found)
+                        {schemeResult && schemeResult.length > 0 && (
+                            <span className="search-scope-indicator">
+                                {' '}within {schemeResult.length} voice results
+                            </span>
+                        )}
+                    </h3>
+                    {filteredSchemes.length > 0 ? (
+                        <div className="search-results-list">
+                            {filteredSchemes.map((scheme, index) => (
+                                <div key={scheme.Scheme_ID} className="search-result-card">
+                                    <h4>{scheme.Scheme_Name_Vernacular}</h4>
+                                    <div className="scheme-meta">
+                                        <span>ID:</span> {scheme.Scheme_ID} | <span>Target:</span> {scheme.Target_Group}
+                                    </div>
+                                    <div className="summary-section">
+                                        <p>Summary:</p>
+                                        <div className="summary-answer">{scheme.Summary_Answer_Vernacular}</div>
+                                    </div>
+                                    <details className="details-section">
+                                        <summary>Detailed Information</summary>
+                                        <div className="details-content">
+                                            <p><strong>Age/Eligibility Criteria:</strong> {scheme.Age_Criteria}</p>
+                                            <p><strong>Details:</strong> {scheme.Eligibility_Details_Vernacular}</p>
+                                        </div>
+                                    </details>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="no-search-results">
+                            <p>No schemes found matching "{searchTerm}". Try different keywords.</p>
+                        </div>
+                    )}
+                </div>
+            )}
             
             {isOnline ? (
                 <>
@@ -450,33 +583,38 @@ const Schemes = ({
                 </>
             )}
             
-            {/* Display Search Result / Answer */}
-            {schemeResult && (
-                <div className="result-card">
-                    <h3>Matched Scheme: {schemeResult.Scheme_Name_Vernacular}</h3>
-                    <div className="scheme-meta">
-                        <span>ID:</span> {schemeResult.Scheme_ID} | <span>Target:</span> {schemeResult.Target_Group}
-                    </div>
-                    
-                    <div className="summary-section">
-                        <p>सारांश उत्तर (Summary Answer - Spoken Aloud):</p>
-                        <div className="summary-answer">{schemeResult.Summary_Answer_Vernacular}</div>
-                    </div>
+            {/* Display Search Results / Answers */}
+            {schemeResult && schemeResult.length > 0 && (
+                <div className="results-container">
+                    <h3>मिली योजनाएं ({schemeResult.length} योजनाएं मिलीं)</h3>
+                    {schemeResult.map((scheme, index) => (
+                        <div key={scheme.Scheme_ID} className="result-card">
+                            <h4>{index + 1}. {scheme.Scheme_Name_Vernacular}</h4>
+                            <div className="scheme-meta">
+                                <span>ID:</span> {scheme.Scheme_ID} | <span>Target:</span> {scheme.Target_Group}
+                            </div>
+                            
+                            <div className="summary-section">
+                                <p>सारांश उत्तर (Summary Answer - Spoken Aloud):</p>
+                                <div className="summary-answer">{scheme.Summary_Answer_Vernacular}</div>
+                            </div>
 
-                    <details className="details-section">
-                        <summary>
-                            विस्तृत जानकारी (Eligibility & Full Details)
-                        </summary>
-                        <div className="details-content">
-                            <p><strong>आयु/पात्रता मानदंड:</strong> {schemeResult.Age_Criteria}</p>
-                            <p><strong>विवरण:</strong> {schemeResult.Eligibility_Details_Vernacular}</p>
+                            <details className="details-section">
+                                <summary>
+                                    विस्तृत जानकारी (Eligibility & Full Details)
+                                </summary>
+                                <div className="details-content">
+                                    <p><strong>आयु/पात्रता मानदंड:</strong> {scheme.Age_Criteria}</p>
+                                    <p><strong>विवरण:</strong> {scheme.Eligibility_Details_Vernacular}</p>
+                                </div>
+                            </details>
                         </div>
-                    </details>
+                    ))}
                 </div>
             )}
 
             {/* Handle No Match Case */}
-            {!isListening && schemeQuery && !schemeResult && (
+            {!isListening && schemeQuery && (!schemeResult || schemeResult.length === 0) && (
                 <div className="no-match-card">
                     <p>माफ़ करें, मुझे इस प्रश्न के लिए कोई सटीक योजना नहीं मिली। कृपया सरल शब्दों में फिर से कोशिश करें।</p>
                 </div>

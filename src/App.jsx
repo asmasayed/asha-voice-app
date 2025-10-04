@@ -613,32 +613,36 @@ const findBestSchemeMatch = (query) => {
 
   return (
     <>
-      <div className="container">
-        <header className="app-header">
-      {/* --- Left side with Logo and Title --- */}
-      <div className="header-left">
-      <img src="/logo.jpg" alt="ASHA Voice Assistant Logo" className="header-logo" />
-      <div className="header-title-group">
-        <h1 className="app-name">ASHA Voice Assistant</h1>
-        <p className="welcome-message">
-          Welcome, {currentUser?.displayName || 'User'}!
-        </p>
-      </div>
-    </div>
+      {/* 1. The header is now a top-level, full-width element, outside the container. */}
+      <header className="app-header">
+        {/* --- Left side with Logo and Title --- */}
+        <div className="header-left">
+          <img src="/logo.jpg" alt="ASHA Voice Assistant Logo" className="header-logo" />
+          <div className="header-title-group">
+            <h1 className="app-name">ASHA Voice Assistant</h1>
+            <p className="welcome-message">
+              Welcome, {currentUser?.displayName || 'User'}!
+            </p>
+          </div>
+        </div>
 
-      {/* --- Right side with Profile Dropdown --- */}
-      <ProfileDropdown
-        user={currentUser}
-        onLogout={handleLogout}
-        isOpen={isDropdownOpen}
-        onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
-        dropdownRef={dropdownRef}
-      />
-    </header>
-        {toast.show && (
-          <Toast message={toast.message} type={toast.type} onClose={hideToast} />
-        )}
-        <main className="container">
+        {/* --- Right side with Profile Dropdown --- */}
+        <ProfileDropdown
+          user={currentUser}
+          onLogout={handleLogout}
+          isOpen={isDropdownOpen}
+          onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
+          dropdownRef={dropdownRef}
+        />
+      </header>
+
+      {/* 2. The container now ONLY wraps the main page content. */}
+      {/* This div is what provides the centering and side margins. */}
+      <div className="container">
+        <main>
+          {toast.show && (
+            <Toast message={toast.message} type={toast.type} onClose={hideToast} />
+          )}
           {activePage === 'home' && (
             <HomePage
               parsedData={parsedData}
@@ -678,9 +682,11 @@ const findBestSchemeMatch = (query) => {
               handleStartSchemeSearch={handleStartSchemeSearch}
               handleStopSchemeSearch={handleStopSchemeSearch}
             />
-)}
+          )}
         </main>
       </div>
+
+      {/* The Navbar and Modal remain at the bottom, outside the main container. */}
       <Navbar activePage={activePage} onNavigate={handleNavigate} />
       <VisitDetailModal visit={selectedVisit} onClose={handleCloseModal} />
     </>

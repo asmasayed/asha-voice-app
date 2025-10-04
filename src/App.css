@@ -115,11 +115,14 @@ body {
   margin: 0 auto;
   padding: 0 var(--space-4);
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 main.container {
   padding-top: var(--space-6);
   padding-bottom: calc(80px + var(--space-6)); /* Space for fixed bottom navbar */
+  min-height: calc(100vh - 80px); /* Ensure proper height */
 }
 
 /* === TYPOGRAPHY === */
@@ -152,6 +155,7 @@ header {
   z-index: var(--z-sticky);
   padding: var(--space-3) var(--space-4);
   width: 100%;
+  box-sizing: border-box;
 }
 
 .header-left {
@@ -193,7 +197,10 @@ header {
   padding: var(--space-6);
   transition: box-shadow var(--transition-normal), transform var(--transition-normal);
   text-align: left;
-  margin-bottom: var(--space-6);
+  margin: 0 auto var(--space-6) auto;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .card:hover {
@@ -243,8 +250,11 @@ header {
 .btn-success, .btn-confirm { background-color: var(--success-color); color: var(--white); }
 .btn-success:hover:not(:disabled), .btn-confirm:hover:not(:disabled) { background-color: var(--success-hover); }
 
-.btn-warning, .btn-pause { background-color: var(--warning-color); color: var(--text-dark); }
+.btn-warning, .btn-pause { background-color: var(--warning-color); color: var(--white); }
 .btn-warning:hover:not(:disabled), .btn-pause:hover:not(:disabled) { background-color: var(--warning-hover); }
+
+.btn-resume { background-color: var(--success-color); color: var(--white); }
+.btn-resume:hover:not(:disabled) { background-color: var(--success-hover); }
 
 .btn-danger, .btn-stop { background-color: var(--danger-color); color: var(--white); }
 .btn-danger:hover:not(:disabled), .btn-stop:hover:not(:disabled) { background-color: var(--danger-hover); }
@@ -577,15 +587,25 @@ input::placeholder, textarea::placeholder {
 
 
 /* === RESPONSIVE STYLES === */
+@media (max-width: 1200px) {
+  .container {
+    max-width: 100%;
+    padding: 0 var(--space-4);
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 0 var(--space-3);
+    margin: 0;
   }
   main.container {
     padding-top: var(--space-4);
   }
   .card {
     padding: var(--space-4);
+    margin-left: var(--space-2);
+    margin-right: var(--space-2);
   }
   .auth-form {
     padding: var(--space-6);
@@ -593,6 +613,54 @@ input::placeholder, textarea::placeholder {
   .button-group-confirm {
     flex-direction: column;
     gap: var(--space-3);
+  }
+  .button-group-horizontal {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  header {
+    padding: var(--space-2) var(--space-3);
+  }
+  .header-left {
+    gap: var(--space-2);
+  }
+  .app-name {
+    font-size: var(--font-size-base);
+  }
+  .welcome-message {
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 var(--space-2);
+  }
+  .card {
+    padding: var(--space-3);
+    margin-left: var(--space-1);
+    margin-right: var(--space-1);
+  }
+  .mic-button {
+    width: 70px;
+    height: 70px;
+  }
+  .mic-button img {
+    width: 35px;
+    height: 35px;
+  }
+  header {
+    padding: var(--space-1) var(--space-2);
+  }
+  .header-logo {
+    width: 32px;
+    height: 32px;
+  }
+  .app-name {
+    font-size: var(--font-size-sm);
+  }
+  .welcome-message {
+    font-size: 0.7rem;
   }
 }
 .toast-message {

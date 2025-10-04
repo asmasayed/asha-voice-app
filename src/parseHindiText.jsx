@@ -87,8 +87,8 @@ function parseHindiText(text, visitType = 'General') {
       if (!['है', 'हैं', 'था', 'थी', 'थे', 'साल', 'उम्र', 'पता', 'मोबाइल'].includes(name)) {
         data.basicInfo.patientName = name;
         console.log('Extracted name:', name);
-        break;
-      }
+          break;
+        }
     }
   }
 
@@ -109,7 +109,7 @@ function parseHindiText(text, visitType = 'General') {
         console.log('Extracted age:', age);
           break;
         }
-    }
+      }
   }
 
   // 3. MOBILE NUMBER EXTRACTION
@@ -146,9 +146,9 @@ function parseHindiText(text, visitType = 'General') {
       if (address.length > 2) {
         data.basicInfo.address = address;
         console.log('Extracted address:', address);
-        break;
-      }
+      break;
     }
+  }
   }
 
   // 5. GENDER EXTRACTION

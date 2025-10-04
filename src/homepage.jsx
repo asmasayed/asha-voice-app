@@ -67,7 +67,7 @@ const HomePage = ({
       <ol>
         <li>Press the microphone button to start recording.</li>
         <li>Speak the patient's details clearly.</li>
-        <li>Press "Pause" or "Stop & Finish" when done.</li>
+        <li>Press "Pause" or "Finish" when done.</li>
         <li>Once Paused, you can correct the Text by adding spaces.</li>
         <li>After Recording, Correct any errors on the confirmation screen.</li>
       </ol>
@@ -238,7 +238,7 @@ const HomePage = ({
                       </div>
                       <div className="button-group-horizontal">
                         <button onClick={handlePause} className="btn btn-pause">Pause</button>
-                        <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
+                        <button onClick={handleStop} className="btn btn-stop">Finish</button>
                       </div>
                     </>
                   )}
@@ -249,14 +249,18 @@ const HomePage = ({
                       </div>
                       <div className="button-group-horizontal">
                         <button onClick={handleStartOrResume} className="btn btn-resume">Resume</button>
-                        <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
+                        <button onClick={handleStop} className="btn btn-stop">Finish</button>
                       </div>
                     </>
                   )}
                 </div>
                 {recordingStatus !== 'idle' && (
                   <div ref={transcriptBoxRef} className="transcript-box" onMouseUp={handleTextSelection}>
-                    <p>{transcribedText || "Your recorded text will appear here..."}</p>
+                    {transcribedText ? (
+                      <p>{transcribedText}</p>
+                    ) : (
+                      <p className="placeholder-text">Your recorded text will appear here...</p>
+                    )}
                   </div>
                 )}
               </>

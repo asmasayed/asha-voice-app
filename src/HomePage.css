@@ -19,6 +19,10 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   padding: 25px;
   margin-bottom: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Section 1: Welcome Header */
@@ -163,9 +167,23 @@
   height: 120px;
   max-height: 120px;
   overflow-y: auto;
-  color: var(--text-light);
   text-align: left;
   border: 1px solid var(--border-color);
+  font-family: var(--font-family);
+}
+
+.transcript-box p {
+  margin: 0;
+  font-style: italic;
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  color: var(--text-dark);
+}
+
+.transcript-box .placeholder-text {
+  color: var(--text-light);
+  font-size: var(--font-size-sm);
+  font-weight: normal;
 }
 
 /* Keyframes for Pulse Animation */
@@ -222,4 +240,65 @@
 .btn.btn-primary {
   background-color: var(--primary-color);
   color: white;
+}
+
+/* === RESPONSIVE STYLES FOR HOMEPAGE === */
+@media (max-width: 768px) {
+  .card {
+    padding: 20px;
+    margin-bottom: 15px;
+  }
+  
+  .action-card {
+    margin-bottom: 1.5rem;
+  }
+  
+  .button-group-horizontal {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .transcript-box {
+    height: 100px;
+    max-height: 100px;
+    padding: 12px;
+  }
+  
+  .mic-button {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .mic-button img {
+    width: 35px;
+    height: 35px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 15px;
+    margin-bottom: 12px;
+  }
+  
+  .transcript-box {
+    height: 80px;
+    max-height: 80px;
+    padding: 10px;
+  }
+  
+  .mic-button {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .mic-button img {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .btn {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
 }
