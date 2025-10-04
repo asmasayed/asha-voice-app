@@ -1,0 +1,92 @@
+/* --- HEADER & PROFILE DROPDOWN STYLES --- */
+
+/* Update header to use Flexbox for alignment */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  position: relative; /* Needed for dropdown positioning */
+}
+
+.header-content {
+  text-align: center;
+  flex-grow: 1; /* Allows the title to take up space and stay centered */
+}
+
+.profile-dropdown-container {
+  position: relative; /* This is the anchor for the dropdown menu */
+}
+
+.profile-picture-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  padding: 0;
+  cursor: pointer;
+  background-color: #eee;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Ensures the image stays round */
+}
+
+.profile-picture-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-picture-button span {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #555;
+}
+
+.profile-dropdown-menu {
+  position: absolute;
+  top: 110%; /* Position it just below the button */
+  right: 0;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  width: 240px;
+  z-index: 100;
+  border: 1px solid #eee;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.dropdown-user-info {
+  padding: 15px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-user-info strong {
+  font-size: 1rem;
+}
+
+.dropdown-user-info p {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 4px 0 0 0;
+}
+
+.dropdown-logout-button {
+  background: none;
+  border: none;
+  padding: 15px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.dropdown-logout-button:hover {
+  background-color: #f8f8f8;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

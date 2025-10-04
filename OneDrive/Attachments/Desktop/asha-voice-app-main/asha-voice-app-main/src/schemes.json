@@ -1,0 +1,290 @@
+[
+  {
+    "Scheme_ID": "M1",
+    "Scheme_Name_Vernacular": "जननी सुरक्षा योजना (JSY) - लाभ",
+    "Target_Group": "Pregnant Women, BPL",
+    "Age_Criteria": ">= 19 years (Woman's Age), First two live births",
+    "Keywords_Vernacular": "JSY, लाभ, पैसा, डिलीवरी, जननी",
+    "Summary_Answer_Vernacular": "संस्थागत प्रसव के लिए गरीब गर्भवती महिलाओं को ₹1,400 तक की आर्थिक सहायता मिलती है।",
+    "Eligibility_Details_Vernacular": "**पात्रता:** BPL कार्ड वाली, 19 वर्ष से अधिक उम्र की महिला। **लाभ:** ग्रामीण ₹1400, शहरी ₹1000."
+  },
+  {
+    "Scheme_ID": "M2",
+    "Scheme_Name_Vernacular": "प्रधानमंत्री मातृत्व वंदना योजना (PMMVY)",
+    "Target_Group": "Pregnant Women, First Child",
+    "Age_Criteria": ">= 18 years (Woman's Age), First child only",
+    "Keywords_Vernacular": "PMMVY, 5000, किस्त, पहली संतान, मातृत्व",
+    "Summary_Answer_Vernacular": "इस योजना में पहले जीवित बच्चे के लिए गर्भवती महिला को तीन किस्तों में ₹5,000 की नकद राशि मिलती है।",
+    "Eligibility_Details_Vernacular": "**किस्त:** पहली ₹1000 (जल्दी पंजीकरण), दूसरी ₹2000 (6 महीने बाद), तीसरी ₹2000 (जन्म पंजीकरण)।"
+  },
+  {
+    "Scheme_ID": "M3",
+    "Scheme_Name_Vernacular": "PMSMA चेकअप प्रोटोकॉल",
+    "Target_Group": "Pregnant Women",
+    "Age_Criteria": ">= 3 months of pregnancy (2nd/3rd trimester)",
+    "Keywords_Vernacular": "PMSMA, 9 तारीख, जांच, डॉक्टर, हाई रिस्क",
+    "Summary_Answer_Vernacular": "हर महीने की 9 तारीख को गर्भवती महिलाओं के लिए मुफ्त, व्यापक प्रसवपूर्व जांच (ANC) की सुविधा।",
+    "Eligibility_Details_Vernacular": "**उद्देश्य:** उच्च जोखिम वाली गर्भवती महिलाओं (HRP) की पहचान करना और उन्हें रेफर करना।"
+  },
+  {
+    "Scheme_ID": "M4",
+    "Scheme_Name_Vernacular": "ANC पंजीकरण",
+    "Target_Group": "Pregnant Women",
+    "Age_Criteria": "<= 12 weeks of pregnancy (First Trimester)",
+    "Keywords_Vernacular": "पंजीकरण, गर्भवती, 3 महीने, शुरुआत",
+    "Summary_Answer_Vernacular": "गर्भावस्था के पहले 3 महीने (12 सप्ताह) के भीतर पंजीकरण करवाना अनिवार्य है ताकि IFA और TT टीके समय पर शुरू हों।",
+    "Eligibility_Details_Vernular": "जल्दी पंजीकरण से IFA और TT के टीके समय पर शुरू हो पाते हैं। यह JSY के लिए भी महत्वपूर्ण है।"
+  },
+  {
+    "Scheme_ID": "M5",
+    "Scheme_Name_Vernacular": "हाई रिस्क प्रेगनेंसी (HRP) - खतरे के संकेत",
+    "Target_Group": "Pregnant Women",
+    "Age_Criteria": "All (During Pregnancy)",
+    "Keywords_Vernacular": "खतरा, HRP, खून, सूजन, झटके, इमरजेंसी",
+    "Summary_Answer_Vernacular": "चेहरे या पैरों में अचानक सूजन, योनि से खून बहना, या तेज सिरदर्द होने पर तुरंत अस्पताल रेफर करें।",
+    "Eligibility_Details_Vernacular": "ये संकेत एक्लम्पसिया या अन्य गंभीर जटिलताओं के हो सकते हैं। तुरंत रेफरल जीवन रक्षक है।"
+  },
+  {
+    "Scheme_ID": "M6",
+    "Scheme_Name_Vernacular": "IFA गोली वितरण (गर्भवती)",
+    "Target_Group": "Pregnant Women",
+    "Age_Criteria": "Pregnant: Full term",
+    "Keywords_Vernacular": "IFA, खून की कमी, लाल गोली, एनीमिया",
+    "Summary_Answer_Vernacular": "गर्भवती महिलाओं को एनीमिया (खून की कमी) रोकने के लिए IFA की लाल गोली (180 दिन) रोज़ खानी है।",
+    "Eligibility_Details_Vernacular": "**खुराक:** 180 दिन तक रोज़ 1 लाल गोली। ANC चेकअप के दौरान Hb लेवल की जांच करना सुनिश्चित करें।"
+  },
+  {
+    "Scheme_ID": "M7",
+    "Scheme_Name_Vernacular": "मातृ मृत्यु रिपोर्टिंग",
+    "Target_Group": "Community, Health System",
+    "Age_Criteria": "Woman: 15-49 years (Reproductive Age)",
+    "Keywords_Vernacular": "मृत्यु, रिपोर्ट, माँ की मौत, ₹200",
+    "Summary_Answer_Vernacular": "गाँव में माँ की मृत्यु होने पर 24 घंटे के भीतर PHC मेडिकल ऑफिसर को फोन पर रिपोर्ट करना है।",
+    "Eligibility_Details_Vernacular": "**ASHA प्रोत्साहन:** 24 घंटे के भीतर रिपोर्ट करने पर ₹200 का प्रोत्साहन मिलता है। यह डेटा बहुत महत्वपूर्ण है।"
+  },
+  {
+    "Scheme_ID": "M8",
+    "Scheme_Name_Vernacular": "MTP सेवाएँ रेफरल",
+    "Target_Group": "Women",
+    "Age_Criteria": "Reproductive Age",
+    "Keywords_Vernacular": "MTP, गर्भपात, सेवा, ₹150",
+    "Summary_Answer_Vernacular": "सुरक्षित गर्भपात (Medical Termination of Pregnancy) के लिए महिला को स्वास्थ्य केंद्र तक पहुँचाने में मदद करना।",
+    "Eligibility_Details_Vernacular": "**ASHA प्रोत्साहन:** महिला को MTP सेवा के लिए ले जाने पर ₹150 का प्रोत्साहन मिलता है। सुरक्षित प्रक्रिया सुनिश्चित करें।"
+  },
+  {
+    "Scheme_ID": "C1",
+    "Scheme_Name_Vernacular": "HBNC विज़िट",
+    "Target_Group": "Newborns, Postpartum Mothers",
+    "Age_Criteria": "0 to 42 days (Newborn Age)",
+    "Keywords_Vernacular": "HBNC, नवजात, जन्म के बाद, 6 बार, ₹250",
+    "Summary_Answer_Vernacular": "जन्म के बाद 42 दिनों तक बच्चे और माँ की देखभाल के लिए ASHA द्वारा 6 से 7 गृह दौरे करना अनिवार्य है।",
+    "Eligibility_Details_Vernacular": "**संस्थागत प्रसव:** 6 दौरे (तीसरा, 7वां, 14वां, 21वां, 28वां, 42वां दिन)। **ASHA प्रोत्साहन:** ₹250."
+  },
+  {
+    "Scheme_ID": "C2",
+    "Scheme_Name_Vernacular": "HBYC विज़िट",
+    "Target_Group": "Young Children",
+    "Age_Criteria": "3, 6, 9, 12, 15 months (Quarterly)",
+    "Keywords_Vernacular": "HBYC, बच्चे की देखभाल, पोषण, जांच, ₹250",
+    "Summary_Answer_Vernacular": "3 माह से 15 माह तक के बच्चों में स्तनपान, पूरक आहार और विकास सुनिश्चित करने के लिए 5 गृह दौरे करना।",
+    "Eligibility_Details_Vernacular": "**ASHA प्रोत्साहन:** ₹50 प्रति दौरा (कुल ₹250) यदि 5 दौरे पूरे हों। यह HBYC शेड्यूल है।"
+  },
+  {
+    "Scheme_ID": "C3",
+    "Scheme_Name_Vernacular": "RBSK बच्चों की जांच",
+    "Target_Group": "Children (Screening)",
+    "Age_Criteria": "0 to 18 years",
+    "Keywords_Vernacular": "RBSK, जांच, बीमारी, 18 साल, स्कूल",
+    "Summary_Answer_Vernacular": "0 से 18 वर्ष तक के बच्चों में जन्म दोष, बीमारियाँ, कमी और विकास में देरी की मुफ्त जांच और उपचार।",
+    "Eligibility_Details_Vernacular": "**कवर:** 4 'D's—जन्म दोष, बीमारियाँ, पोषण में कमी, और विकास में देरी की जांच। स्थान: स्कूल और आंगनवाड़ी।"
+  },
+  {
+    "Scheme_ID": "C4",
+    "Scheme_Name_Vernacular": "SAM/MAM बच्चे रेफरल",
+    "Target_Group": "Children with Malnutrition",
+    "Age_Criteria": "<= 5 years",
+    "Keywords_Vernacular": "SAM, कुपोषित, वजन कम, पोषण पुनर्वास, NRC",
+    "Summary_Answer_Vernacular": "गंभीर तीव्र कुपोषण (SAM) या मध्यम तीव्र कुपोषण (MAM) वाले बच्चों को NRC (Nutrition Rehabilitation Centre) रेफरल करना।",
+    "Eligibility_Details_Vernacular": "**ASHA प्रोत्साहन:** NRC से डिस्चार्ज हुए बच्चे का फॉलो-अप करने पर ₹150 का प्रोत्साहन।"
+  },
+  {
+    "Scheme_ID": "C5",
+    "Scheme_Name_Vernacular": "ORS/ज़िंक वितरण",
+    "Target_Group": "Children with Diarrhea",
+    "Age_Criteria": "<= 5 years",
+    "Keywords_Vernacular": "दस्त, ORS, ज़िंक, वितरण, ₹1",
+    "Summary_Answer_Vernacular": "दस्त के दौरान बच्चों में निर्जलीकरण (dehydration) को रोकने के लिए ORS और ज़िंक का घोल देना।",
+    "Eligibility_Details_Vernacular": "**ASHA प्रोत्साहन:** IDCF (Intensified Diarrhea Control Fortnight) के दौरान ORS पैकेट वितरित करने पर ₹1 प्रति पैकेट।"
+  },
+  {
+    "Scheme_ID": "I1",
+    "Scheme_Name_Vernacular": "पूर्ण टीकाकरण (Complete Immunization)",
+    "Target_Group": "Children",
+    "Age_Criteria": "<= 2 years",
+    "Keywords_Vernacular": "टीकाकरण, पूर्ण टीका, 2 साल तक, खुराक",
+    "Summary_Answer_Vernacular": "बच्चे के 2 साल का होने तक BCG, DPT, Measles सहित सभी आवश्यक टीके लगवाना अनिवार्य है।",
+    "Eligibility_Details_Vernacular": "**ASHA प्रोत्साहन:** 1 साल के बच्चे के लिए पूर्ण टीकाकरण पर ₹100, और 2 साल तक पूरा होने पर ₹75 अतिरिक्त।"
+  },
+  {
+    "Scheme_ID": "I2",
+    "Scheme_Name_Vernacular": "पल्स पोलियो अभियान",
+    "Target_Group": "Children",
+    "Age_Criteria": "<= 5 years",
+    "Keywords_Vernacular": "पोलियो, बूंद, 5 साल तक, रविवार, ₹100",
+    "Summary_Answer_Vernacular": "5 साल से कम उम्र के सभी बच्चों को पोलियो की दो बूंदें (oral drops) पिलाने के लिए मोबिलाइज करना।",
+    "Eligibility_Details_Vernacular": "**ASHA प्रोत्साहन:** प्रति दिन ₹100 का प्रोत्साहन (Mobilization) मिलता है।"
+  },
+  {
+    "Scheme_ID": "I3",
+    "Scheme_Name_Vernacular": "DPT बूस्टर",
+    "Target_Group": "Children",
+    "Age_Criteria": "5-6 years",
+    "Keywords_Vernacular": "DPT बूस्टर, 5 साल, स्कूल टीका, ₹50",
+    "Summary_Answer_Vernacular": "बच्चे के 5 से 6 साल की उम्र के बीच DPT का बूस्टर टीका लगवाना अनिवार्य है।",
+    "Eligibility_Details_Vernacular": "**ASHA प्रोत्साहन:** प्रति बच्चा ₹50 का प्रोत्साहन मिलता है।"
+  },
+  {
+    "Scheme_ID": "I4",
+    "Scheme_Name_Vernacular": "मिशन इन्द्रधनुष",
+    "Target_Group": "Children, Pregnant Women",
+    "Age_Criteria": "<= 2 years",
+    "Keywords_Vernacular": "इन्द्रधनुष, छूटे हुए टीके, मिशन, खुराक",
+    "Summary_Answer_Vernacular": "उन बच्चों और गर्भवती महिलाओं को टीके लगाना जो नियमित टीकाकरण कार्यक्रम से छूट गए हैं, पूर्ण कवरेज सुनिश्चित करना।",
+    "Eligibility_Details_Vernacular": "यह टीकाकरण अभियान छूटे हुए क्षेत्रों और लाभार्थियों पर विशेष ध्यान केंद्रित करता है।"
+  },
+  {
+    "Scheme_ID": "F1",
+    "Scheme_Name_Vernacular": "परिवार नियोजन - अंतर साधन",
+    "Target_Group": "Eligible Couples",
+    "Age_Criteria": "Woman: 15-49 years",
+    "Keywords_Vernacular": "अंतर, 2 साल, 3 साल, दूसरा बच्चा, ₹500",
+    "Summary_Answer_Vernacular": "पहले बच्चे के जन्म के बाद 3 साल का अंतर रखने के लिए दंपत्ति को गर्भनिरोधक साधनों पर परामर्श देना।",
+    "Eligibility_Details_Vernacular": "**ASHA प्रोत्साहन:** पहले बच्चे के 3 साल बाद अंतर पर ₹500."
+  },
+  {
+    "Scheme_ID": "F2",
+    "Scheme_Name_Vernacular": "स्थायी साधन (Permanent Method) रेफरल",
+    "Target_Group": "Couples",
+    "Age_Criteria": "After 2 children",
+    "Keywords_Vernacular": "बंध्याकरण, नसबंदी, स्थायी तरीका, ₹1000",
+    "Summary_Answer_Vernacular": "दो बच्चों के बाद दंपत्ति को स्थायी परिवार नियोजन साधन (नसबंदी/बंध्याकरण) अपनाने के लिए प्रेरित करना।",
+    "Eligibility_Details_Vernacular": "**ASHA प्रोत्साहन:** स्थायी साधन अपनाने पर ₹1000 का प्रोत्साहन मिलता है।"
+  },
+  {
+    "Scheme_ID": "F3",
+    "Scheme_Name_Vernacular": "IUCD/PPIUCD रेफरल",
+    "Target_Group": "Postpartum Women",
+    "Age_Criteria": "Woman: 15-49 years",
+    "Keywords_Vernacular": "IUCD, कॉपर टी, बच्चेदानी, ₹150",
+    "Summary_Answer_Vernacular": "बच्चों में अंतर रखने के लिए IUCD (Intra-Uterine Contraceptive Device) लगवाने के लिए महिला को स्वास्थ्य केंद्र ले जाना।",
+    "Eligibility_Details_Vernacular": "**ASHA प्रोत्साहन:** IUCD/PPIUCD लगाने में मदद करने पर ₹150 का प्रोत्साहन।"
+  },
+  {
+    "Scheme_ID": "F4",
+    "Scheme_Name_Vernacular": "कंडोम/OCP वितरण",
+    "Target_Group": "Eligible Couples",
+    "Age_Criteria": "Woman: 15-49 years",
+    "Keywords_Vernacular": "कंडोम, गोली, गर्भनिरोधक, OCP, ₹1",
+    "Summary_Answer_Vernacular": "गर्भनिरोधक गोलियाँ (OCP) और कंडोम जैसे वस्तुओं को घर-घर जाकर ASHA किट से वितरित करना।",
+    "Eligibility_Details_Vernacular": "**ASHA प्रोत्साहन:** बिक्री पर ₹1 प्रति पैक/चक्र का प्रोत्साहन।"
+  },
+  {
+    "Scheme_ID": "F5",
+    "Scheme_Name_Vernacular": "मिशन परिवार विकास (MPV) - इंजेक्शन",
+    "Target_Group": "Women",
+    "Age_Criteria": "Woman: 15-49 years",
+    "Keywords_Vernacular": "MPV, इंजेक्शन, अंतरा, छाया, नया साधन",
+    "Summary_Answer_Vernacular": "उच्च प्रजनन दर वाले जिलों में इंजेक्शन (Antara) और गोली (Chhaya) जैसे नए साधनों का प्रचार और वितरण करना।",
+    "Eligibility_Details_Vernacular": "**Antara** इंजेक्शन 3 महीने के लिए कारगर है। **ASHA प्रोत्साहन:** ₹100 प्रति खुराक।"
+  },
+  {
+    "Scheme_ID": "D1",
+    "Scheme_Name_Vernacular": "टीबी (Tuberculosis) रेफरल",
+    "Target_Group": "TB Suspects",
+    "Age_Criteria": "All ages",
+    "Keywords_Vernacular": "टीबी, लगातार खांसी, जांच, ₹5000",
+    "Summary_Answer_Vernacular": "लगातार 2 हफ्तों से ज़्यादा खांसी, बुखार या वजन कम होने पर मरीज को TB जांच के लिए तुरंत रेफर करना चाहिए।",
+    "Eligibility_Details_Vernacular": "**ASHA प्रोत्साहन:** TB रोगी को पूरा इलाज दिलाने पर ₹5,000 तक का प्रोत्साहन मिलता है।"
+  },
+  {
+    "Scheme_ID": "D2",
+    "Scheme_Name_Vernacular": "मलेरिया (Malaria) प्रोटोकॉल",
+    "Target_Group": "Fever Suspects",
+    "Age_Criteria": "All ages",
+    "Keywords_Vernacular": "मलेरिया, बुखार, खून की पट्टी, RDT, ₹75",
+    "Summary_Answer_Vernacular": "बुखार के मरीज की RDT या खून की पट्टी (Blood Slide) बनाकर जांच के लिए भेजना और P. falciparum पॉजिटिव होने पर उपचार सुनिश्चित करना।",
+    "Eligibility_Details_Vernacular": "**ASHA प्रोत्साहन:** Pf (P. falciparum) पॉजिटिव मामले का पूरा उपचार सुनिश्चित करने पर ₹75 का प्रोत्साहन।"
+  },
+  {
+    "Scheme_ID": "D3",
+    "Scheme_Name_Vernacular": "डेंगू/चिकनगुनिया प्रोटोकॉल",
+    "Target_Group": "Community",
+    "Age_Criteria": "All ages",
+    "Keywords_Vernacular": "डेंगू, चिकनगुनिया, पानी जमा, मच्छर, IEC",
+    "Summary_Answer_Vernacular": "समुदाय में जल-जमाव वाले स्थानों को खत्म करने और मच्छर नियंत्रण के लिए IEC (जागरूकता) गतिविधियाँ करना।",
+    "Eligibility_Details_Vernacular": "**रोल:** जागरूकता फैलाना और लार्वा प्रजनन स्थलों को नष्ट करने में मदद करना। यह मौसमी बीमारी नियंत्रण का हिस्सा है।"
+  },
+  {
+    "Scheme_ID": "D4",
+    "Scheme_Name_Vernacular": "लेप्रोसी (Leprosy) प्रोटोकॉल",
+    "Target_Group": "Community",
+    "Age_Criteria": "All ages",
+    "Keywords_Vernacular": "लेप्रोसी, कोढ़, चमड़ी, निशान, ₹600",
+    "Summary_Answer_Vernacular": "त्वचा पर सुन्न (Numb) निशान या गांठ की पहचान कर मरीज को PHC में जांच के लिए रेफर करना।",
+    "Eligibility_Details_Vernacular": "**ASHA प्रोत्साहन:** MDT (Multi-Drug Therapy) उपचार पूरा होने पर ASHA को ₹400 से ₹600 तक का प्रोत्साहन।"
+  },
+  {
+    "Scheme_ID": "D5",
+    "Scheme_Name_Vernacular": "NCD स्क्रीनिंग",
+    "Target_Group": "Adults",
+    "Age_Criteria": ">= 30 years",
+    "Keywords_Vernacular": "ब्लड प्रेशर, शुगर, NCD, 30 साल, जांच",
+    "Summary_Answer_Vernacular": "30 वर्ष से अधिक उम्र के लोगों में गैर-संचारी रोगों (NCD) जैसे BP और Diabetes की जांच के लिए उन्हें HWC (Health & Wellness Centre) रेफर करना।",
+    "Eligibility_Details_Vernacular": "**ASHA का रोल:** 30 साल से ऊपर के लोगों को स्क्रीनिंग के लिए मोबिलाइज करना और फॉलो-अप सुनिश्चित करना।"
+  },
+  {
+    "Scheme_ID": "A1",
+    "Scheme_Name_Vernacular": "RKSK (राष्ट्रीय किशोर स्वास्थ्य कार्यक्रम)",
+    "Target_Group": "Adolescents",
+    "Age_Criteria": "10 to 19 years",
+    "Keywords_Vernacular": "किशोर, RKSK, मासिक धर्म, स्वच्छता, 10 साल",
+    "Summary_Answer_Vernacular": "किशोर-किशोरियों के पोषण, यौन स्वास्थ्य, और मानसिक स्वास्थ्य को बढ़ावा देना।",
+    "Eligibility_Details_Vernacular": "स्वास्थ्य केंद्र पर 'किशोर अनुकूल स्वास्थ्य सेवाएँ' (AFHS) प्रदान करना।"
+  },
+  {
+    "Scheme_ID": "A2",
+    "Scheme_Name_Vernacular": "मासिक धर्म स्वच्छता योजना",
+    "Target_Group": "Adolescent Girls",
+    "Age_Criteria": "10 to 19 years",
+    "Keywords_Vernacular": "सैनिटरी पैड, पैड, किशोरी स्वच्छता, ₹1",
+    "Summary_Answer_Vernacular": "ग्रामीण किशोरियों को कम लागत पर सैनिटरी नैपकिन (Sanitary Napkin) उपलब्ध कराना।",
+    "Eligibility_Details_Vernacular": "**ASHA प्रोत्साहन:** प्रति पैकेट ₹1 का प्रोत्साहन। मासिक धर्म स्वच्छता पर मासिक बैठक आयोजित करना।"
+  },
+  {
+    "Scheme_ID": "A3",
+    "Scheme_Name_Vernacular": "ASHA सुरक्षा पैकेज",
+    "Target_Group": "ASHA Workers",
+    "Age_Criteria": "N/A",
+    "Keywords_Vernacular": "ASHA बीमा, ₹2 लाख, पेंशन",
+    "Summary_Answer_Vernacular": "ASHA को PMJJBY (जीवन बीमा) और PMSBY (दुर्घटना बीमा) के तहत ₹2 लाख का बीमा कवर मिलता है।",
+    "Eligibility_Details_Vernacular": "**पेंशन:** PM-SYM के तहत 60 साल की उम्र के बाद ₹3,000 प्रति माह पेंशन।"
+  },
+  {
+    "Scheme_ID": "A4",
+    "Scheme_Name_Vernacular": "आयुष्मान भारत - ASHA कवर",
+    "Target_Group": "ASHA Workers, Family",
+    "Age_Criteria": "All ages",
+    "Keywords_Vernacular": "ASHA का बीमा, ₹5 लाख, इलाज",
+    "Summary_Answer_Vernacular": "सभी ASHA कर्मियों और उनके परिवारों को आयुष्मान भारत PM-JAY के तहत ₹5 लाख का स्वास्थ्य कवर मिलता है।",
+    "Eligibility_Details_Vernacular": "**लाभ:** ₹5 लाख प्रति वर्ष का मुफ्त अस्पताल में इलाज।"
+  },
+  {
+    "Scheme_ID": "A5",
+    "Scheme_Name_Vernacular": "Village Health, Sanitation, and Nutrition Day (VHSND)",
+    "Target_Group": "Community, Mothers, Children",
+    "Age_Criteria": "All ages (General community event)",
+    "Keywords_Vernacular": "गाँव, स्वास्थ्य दिवस, पोषण, VHSND, सभा",
+    "Summary_Answer_Vernacular": "यह हर महीने गाँव के स्तर पर आयोजित होने वाला एक दिन है जहाँ माँ और बच्चों को स्वास्थ्य सेवाएँ दी जाती हैं।",
+    "Eligibility_Details_Vernacular": "इसमें टीकाकरण, ANC चेकअप, पोषण शिक्षा, और रेफरल सेवाएँ शामिल हैं। ASHA की सक्रिय भागीदारी ज़रूरी है।"
+  }
+]

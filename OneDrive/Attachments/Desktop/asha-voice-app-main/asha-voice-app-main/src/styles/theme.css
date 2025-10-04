@@ -1,0 +1,193 @@
+/* 1) Modern CSS Reset */
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body, h1, h2, h3, h4, h5, h6, p, figure, blockquote, dl, dd { margin: 0; }
+img, picture, video, canvas, svg { display: block; max-width: 100%; }
+input, button, textarea, select { font: inherit; }
+
+/* 2) Design Tokens */
+:root {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+                'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif;
+
+  --bg: #f7f8fc;
+  --surface: #ffffff;
+  --surface-2: #f2f4f7;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e5e7eb;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --shadow-1: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 1px rgba(16, 24, 40, 0.04);
+  --shadow-2: 0 8px 24px rgba(16, 24, 40, 0.08), 0 4px 12px rgba(16, 24, 40, 0.06);
+
+  /* Default accent (overridden by [data-accent]) */
+  --accent: 256 72% 55%;
+  --accent-contrast: #ffffff;
+}
+
+/* 3) Page Accents (unique look per page) */
+html[data-accent="home"]   { --accent: 256 72% 55%; }
+html[data-accent="visits"] { --accent: 199 89% 48%; }
+html[data-accent="schemes"]{ --accent: 142 71% 45%; }
+html[data-accent="auth"]   { --accent:  21 90% 48%; }
+
+/* 4) Base */
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: hsl(var(--accent)); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* 5) Layout */
+.container {
+  width: 100%;
+  max-width: 1120px;
+  padding-inline: 1.25rem;
+  margin-inline: auto;
+}
+
+main {
+  padding-block: 1rem 3.5rem; /* bottom space so bottom navbar doesn't overlap */
+}
+
+/* 6) Header */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: linear-gradient(90deg, hsl(var(--accent) / 0.12), transparent), var(--surface);
+  backdrop-filter: saturate(120%) blur(10px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
+  padding: 0.75rem 1rem;
+}
+.header-left { display: flex; align-items: center; gap: 0.75rem; }
+.header-logo { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; box-shadow: var(--shadow-1); }
+.header-title-group { display: flex; flex-direction: column; }
+.app-name { font-weight: 700; letter-spacing: -0.02em; }
+.welcome-message { color: var(--muted); font-size: 0.95rem; }
+
+/* 7) Navbar */
+.navbar {
+  position: sticky; /* remains at bottom while scrolling main content */
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  background: color-mix(in oklab, white 80%, hsl(var(--accent)) 2%);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(8px);
+}
+.navbar button {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  box-shadow: var(--shadow-1);
+  transition: all .2s ease;
+  font-weight: 600;
+}
+.navbar button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-2);
+}
+.navbar button.active {
+  background: hsl(var(--accent));
+  border-color: hsl(var(--accent));
+  color: var(--accent-contrast);
+}
+
+/* 8) Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+  padding: 1rem;
+}
+
+/* 9) Buttons */
+.btn {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: var(--shadow-1);
+  transition: all .2s ease;
+  cursor: pointer;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-2); }
+.btn:active { transform: translateY(0); }
+
+.btn-primary {
+  background: hsl(var(--accent));
+  border-color: hsl(var(--accent));
+  color: var(--accent-contrast);
+}
+.btn-outline {
+  background: transparent;
+  color: hsl(var(--accent));
+  border-color: hsl(var(--accent) / 0.5);
+}
+
+/* 10) Form Elements */
+input[type="text"], input[type="number"], input[type="email"], select, textarea {
+  width: 100%;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+  box-shadow: var(--shadow-1);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: hsl(var(--accent));
+  box-shadow: 0 0 0 4px hsl(var(--accent) / 0.15);
+}
+
+/* 11) Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
+  background: hsl(var(--accent) / 0.12);
+  color: hsl(var(--accent));
+  border: 1px solid hsl(var(--accent) / 0.5);
+}
+
+/* 12) Utilities */
+.stack > * + * { margin-top: var(--stack-gap, 1rem); }
+.grid { display: grid; gap: 1rem; grid-template-columns: repeat(var(--cols, 12), 1fr); }
+.center { display: grid; place-items: center; }
+.hidden { display: none !important; }
+
+/* 13) Modals (generic baseline) */
+.modal { background: #00000066; backdrop-filter: blur(2px); }
+.modal .modal-content {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+}

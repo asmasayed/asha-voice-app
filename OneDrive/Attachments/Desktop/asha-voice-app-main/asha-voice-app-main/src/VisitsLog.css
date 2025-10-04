@@ -1,0 +1,176 @@
+/* === Visits Log Page Styles === */
+
+.visits-list {
+  display: grid;
+  grid-template-columns: 1fr; /* One column on mobile */
+  gap: 1.5rem;
+  text-align: left;
+}
+
+.visit-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.visit-card-header h3 {
+  margin: 0 0 0.25rem 0;
+  color: var(--primary-color);
+}
+
+.visit-card-header p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.visit-card-body {
+  margin: 1rem 0;
+  flex-grow: 1; /* Pushes the footer to the bottom */
+}
+
+.visit-card-body p {
+  margin: 0.5rem 0;
+}
+
+.visit-card-footer {
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.visit-card-footer .btn {
+  width: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.btn-danger {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s;
+}
+
+.btn-danger:hover {
+  background-color: #c0392b;
+}
+
+/* A little spacing between buttons */
+.visit-card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.visit-card-footer{
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+/* Make the grid two columns on tablets and larger screens */
+@media (min-width: 768px) {
+  .visits-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.search-bar-container {
+  margin-top: 20px;
+  margin-bottom: 25px;
+  padding: 0 5px;
+}
+
+/* --- The Search Input Field --- */
+.search-input {
+  width: 100%; 
+  padding: 12px 16px; 
+  box-sizing: border-box; 
+  
+  
+  font-size: 1rem; 
+  color: #333; 
+  background-color: #f8f9fa; 
+  
+  /* Border and Shape */
+  border: 1px solid #dee2e6; 
+  border-radius: 8px; 
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.search-input:focus {
+  outline: none; 
+  border-color: #1587e4; 
+  box-shadow: 0 0 0 4px rgba(32, 201, 151, 0.2); /
+}
+
+.search-input::placeholder {
+  color: #868e96;
+  opacity: 1; 
+}
+
+.info-with-copy {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px; /* Adds a little space between name and button */
+}
+
+.copy-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem; /* Make the emoji a bit bigger */
+    padding: 0;
+    line-height: 1;
+}
+/* Base style for all skeleton placeholder elements */
+.skeleton {
+  background-color: #e0e0e0; /* A light grey color */
+  border-radius: 4px;
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden; /* This is key for the shimmer effect */
+}
+
+/* Creates the shimmer effect using a pseudo-element */
+.skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+/* Defines the shimmer animation */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Specific sizes for different types of text placeholders */
+.skeleton-title {
+  height: 24px;
+  width: 60%;
+}
+
+.skeleton-text {
+  height: 16px;
+  width: 80%;
+}
+
+.skeleton-text-short {
+    width: 30%;
+}
