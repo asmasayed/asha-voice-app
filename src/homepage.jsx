@@ -258,7 +258,18 @@ const HomePage = ({
               </>
             ) : (
               <div className="offline-container">
-                {/* ... your existing offline JSX ... */}
+                <h3>📶 You are offline.</h3>
+                <p>Please type the visit details below.</p>
+                <textarea
+                  className="offline-textarea"
+                  rows="6"
+                  value={manualText}
+                  onChange={(e) => setManualText(e.target.value)}
+                  placeholder="रोगी का नाम है शीला, उम्र 40 साल..."
+                ></textarea>
+                <button className="btn btn-primary" onClick={() => handleStop(manualText)}>
+                  Parse Text
+                </button>
               </div>
             )}
           </div>
