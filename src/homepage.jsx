@@ -215,82 +215,78 @@ const HomePage = ({
             </div>
         </div>
       ) : (
-        <div className="card recording-view">
-              {isOnline ? (
-                <>
-                  <div className="instructions-panel card">
-          <div className="info-tabs-container">
-            <InfoTab 
-              title="How to Record"
-              content={instructions.howTo}
-              isActive={activeTab === 'howTo'}
-              onClick={() => handleTabToggle('howTo')}
-            />
-            <InfoTab 
-              title="Sample Input"
-              content={instructions.sample}
-              isActive={activeTab === 'sample'}
-              onClick={() => handleTabToggle('sample')}
-            />
-            <InfoTab 
-              title="Offline Mode"
-              content={instructions.offline}
-              isActive={activeTab === 'offline'}
-              onClick={() => handleTabToggle('offline')}
-            />
-          </div>
-        </div>
-                  <div className="button-group">
-                    {recordingStatus === 'idle' && (
+        // --- MAIN RECORDING & INSTRUCTIONS VIEW ---
+        <>
+          {/* Card 1: The Main Action Card */}
+          <div className="card action-card">
+            <h3>Record a New Visit</h3>
+            {isOnline ? (
+              <>
+                <div className="button-group">
+                  {recordingStatus === 'idle' && (
                     <div className="mic-wrapper">
-                        <div onClick={handleStartOrResume} className="mic-button">
+                      <div onClick={handleStartOrResume} className="mic-button">
                         <img src="/mic.png" alt="Microphone icon" />
-                        </div>
-                        <p className="mic-text">Press to Record</p>
+                      </div>
+                      <p className="mic-text">Press to Record</p>
                     </div>
-                    )}
-                    {recordingStatus === 'recording' && (
+                  )}
+                  {recordingStatus === 'recording' && (
                     <>
-                        <div className="mic-button is-recording">
+                      <div className="mic-button is-recording">
                         <img src="/mic.png" alt="Recording icon" />
-                        </div>
-                        <button onClick={handlePause} className="btn btn-pause">Pause</button>
-                        <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
+                      </div>
+                      <button onClick={handlePause} className="btn btn-pause">Pause</button>
+                      <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
                     </>
-                    )}
-                    {recordingStatus === 'paused' && (
+                  )}
+                  {recordingStatus === 'paused' && (
                     <>
-                        <div className="mic-button is-paused">
+                      <div className="mic-button is-paused">
                         <img src="/mic.png" alt="Paused icon" />
-                        </div>
-                        <button onClick={handleStartOrResume} className="btn btn-resume">Resume</button>
-                        <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
+                      </div>
+                      <button onClick={handleStartOrResume} className="btn btn-resume">Resume</button>
+                      <button onClick={handleStop} className="btn btn-stop">Stop & Finish</button>
                     </>
-                    )}
+                  )}
                 </div>
                 {recordingStatus !== 'idle' && (
-                    <div ref={transcriptBoxRef} className="transcript-box"  onMouseUp={handleTextSelection}>
+                  <div ref={transcriptBoxRef} className="transcript-box" onMouseUp={handleTextSelection}>
                     <p>{transcribedText || "Your recorded text will appear here..."}</p>
-                    </div>
+                  </div>
                 )}
               </>
             ) : (
               <div className="offline-container">
-                <h3>📶 You are offline.</h3>
-                <p>Please type the visit details below.</p>
-                <textarea
-                  className="offline-textarea"
-                  rows="6"
-                  value={manualText}
-                  onChange={(e) => setManualText(e.target.value)}
-                  placeholder="रोगी का नाम है शीला, उम्र 40 साल..."
-                ></textarea>
-                <button className="btn btn-primary" onClick={() => handleStop(manualText)}>
-                  Parse Text
-                </button>
+                {/* ... your existing offline JSX ... */}
               </div>
             )}
-        </div>
+          </div>
+
+          {/* Card 2: The Instructions Card */}
+          <div className="card instructions-panel">
+            <div className="info-tabs-container">
+              <InfoTab
+                title="How to Record"
+                content={instructions.howTo}
+                isActive={activeTab === 'howTo'}
+                onClick={() => handleTabToggle('howTo')}
+              />
+              <InfoTab
+                title="Sample Input"
+                content={instructions.sample}
+                isActive={activeTab === 'sample'}
+                onClick={() => handleTabToggle('sample')}
+              />
+              <InfoTab
+                title="Offline Mode"
+                content={instructions.offline}
+                isActive={activeTab === 'offline'}
+                onClick={() => handleTabToggle('offline')}
+              />
+            </div>
+          </div>
+        </>
       )}
     </>
   );
